@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>VTC Pro - BKTRANSPORT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        vtc: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                            brand: '#10b981',
+                            accent: '#3b82f6',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+        body { -webkit-tap-highlight-color: transparent; background-color: #0f172a; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        .whitespace-pre-wrap { white-space: pre-wrap; }
+
+        /* Style spécifique pour l'impression native (PDF Safari / iOS) */
+        @media print {
+            body * {
+                visibility: hidden !important;
+            }
+            #printable-bon, #printable-bon * {
+                visibility: visible !important;
+            }
+            #printable-bon {
+                position: fixed !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+                margin: 0 !important;
+                padding: 25px !important;
+                box-shadow: none !important;
+                border: none !important;
+                background: white !important;
+                color: black !important;
+                font-size: 13pt !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-vtc-900 text-white font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- Header (Total Caisse) -->
+    <header class="bg-vtc-800 px-4 py-3 flex justify-between items-center shadow-md z-10 border-b border-vtc-700/50">
+        <div class="flex flex-col">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">BKTRANSPORT • Aujourd'hui</span>
+            <div class="flex items-baseline gap-1">
+                <span id="header-total" class="text-2xl sm:text-3xl font-extrabold text-vtc-brand">0.00</span>
+                <span class="text-base text-vtc-brand font-bold">€</span>
+            </div>
+        </div>
+        <button onclick="confirmResetDay()" class="bg-vtc-900 hover:bg-red-950/40 border border-vtc-700 hover:border-red-500/50 text-slate-300 hover:text-red-400 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+            Reset Jour
+        </button>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto pb-24 relative">
+        
+        <!-- Toast Notification -->
+        <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-vtc-accent text-white px-5 py-2.5 rounded-full shadow-2xl text-xs font-bold transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2 border border-blue-400/30">
+            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+            <span id="toast-msg">Action effectuée</span>
+        </div>
+
+        <!-- TAB 1: CAISSE DU JOUR -->
+        <div id="tab-caisse" class="tab-content active p-4 space-y-5">
+            <div class="bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700/50 flex flex-col items-center">
+                <label class="text-xs text-slate-400 font-medium mb-2">Ajouter un montant (€)</label>
+                <input type="number" id="input-amount" placeholder="0.00" inputmode="decimal" step="0.01" class="w-full bg-vtc-900 border-2 border-vtc-700 rounded-xl p-3.5 text-center text-3xl font-extrabold text-white focus:outline-none focus:border-vtc-brand transition mb-4">
+                
+                <button onclick="addEarning()" class="w-full bg-vtc-brand hover:bg-emerald-600 text-slate-950 font-bold text-base py-3.5 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                    Encaisser la course
+                </button>
+            </div>
+
+            <div>
+                <div class="flex justify-between items-center mb-2 px-1">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Courses enregistrées</h3>
+                    <span id="count-courses" class="text-xs text-slate-500 font-medium">0 course</span>
+                </div>
+                <div id="earnings-list" class="space-y-2">
+                    <div class="text-center text-slate-500 py-8 text-xs">Aucune recette pour le moment.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SCAN IA RENTABILITÉ -->
+        <div id="tab-scan" class="tab-content p-4 space-y-5">
+            <div class="bg-gradient-to-br from-indigo-950/60 to-purple-950/60 rounded-2xl p-5 shadow-lg border border-indigo-500/30">
+                <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                    <i data-lucide="scan-line" class="text-indigo-400"></i> Scan IA Rentabilité
+                </h2>
+                <p class="text-xs text-indigo-200/80 mb-4 leading-relaxed">
+                    Importez une capture d'écran de course (Uber, Bolt...). L'IA analyse le tarif et la durée par rapport à votre objectif (35-60€/h) en Toyota Auris E85.
+                </p>
+
+                <div class="relative w-full aspect-video bg-vtc-900/80 border-2 border-dashed border-indigo-500/40 rounded-xl flex flex-col items-center justify-center overflow-hidden mb-4 cursor-pointer" id="scan-dropzone" onclick="document.getElementById('scan-upload').click()">
+                    <input type="file" id="scan-upload" accept="image/*" class="hidden" onchange="previewScan(event)">
+                    <div id="scan-placeholder" class="flex flex-col items-center text-indigo-400/70 p-4 text-center">
+                        <i data-lucide="image-plus" class="w-8 h-8 mb-2"></i>
+                        <span class="font-semibold text-xs">Toucher pour sélectionner la capture</span>
+                    </div>
+                    <img id="scan-preview" class="hidden absolute inset-0 w-full h-full object-contain bg-black/50" />
+                </div>
+
+                <button id="btn-analyze" onclick="analyzeScreenshot()" disabled class="w-full bg-indigo-600 disabled:bg-slate-800 disabled:text-slate-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                    <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    Analyser la rentabilité
+                </button>
+            </div>
+
+            <div id="scan-result-container" class="hidden bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Verdict de l'IA</h3>
+                <div id="scan-result" class="text-slate-200 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium"></div>
+            </div>
+        </div>
+
+        <!-- TAB 3: DEVIS PRIVÉ -->
+        <div id="tab-devis" class="tab-content p-4 space-y-5">
+            <div class="bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700/50 space-y-3.5">
+                <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <i data-lucide="calculator" class="text-vtc-accent"></i> Estimation Course Privée
+                </h2>
+                
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Lieu de prise en charge</label>
+                    <input type="text" id="devis-from" placeholder="Ex: Gare de Lyon, Paris" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Destination</label>
+                    <input type="text" id="devis-to" placeholder="Ex: Aéroport CDG, Roissy" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Trafic & Conditions</label>
+                    <select id="devis-demand" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
+                        <option value="Fluide">Trafic Fluide (Journée)</option>
+                        <option value="Normal" selected>Trafic Normal</option>
+                        <option value="Dense">Bouchons / Heure de pointe / Nuit</option>
+                    </select>
+                </div>
+
+                <button id="btn-devis" onclick="generateDevis()" class="w-full bg-vtc-accent hover:bg-blue-500 text-white font-bold py-3.5 mt-2 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                    <i data-lucide="cpu" class="w-5 h-5"></i>
+                    Calculer le Tarif Conseillé
+                </button>
+            </div>
+
+            <div id="devis-result-container" class="hidden bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Proposition commerciale</h3>
+                <div id="devis-result" class="text-slate-200 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium"></div>
+            </div>
+        </div>
+
+        <!-- TAB 4: BON DE RÉSERVATION VTC EXPRESS -->
+        <div id="tab-resa" class="tab-content p-4 space-y-4">
+            
+            <!-- Rappel Entreprise -->
+            <div class="bg-slate-800/80 rounded-xl p-3.5 border border-slate-700 text-xs text-slate-300 space-y-1">
+                <div class="flex justify-between font-bold text-white border-b border-slate-700 pb-1.5 mb-1.5">
+                    <span>BKTRANSPORT</span>
+                    <span class="text-yellow-400">SIRET: 84435446400027</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <p>• Chauffeur: <strong class="text-white">Anisse</strong></p>
+                    <p>• Tél: <strong class="text-white">07 43 29 99 96</strong></p>
+                    <p>• Immat: <strong class="text-white">EF-842-SJ</strong></p>
+                    <p>• TVA: <strong class="text-white">10 % (Inclus)</strong></p>
+                </div>
+            </div>
+
+            <div class="bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700/50 space-y-3">
+                <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
+                    <i data-lucide="file-badge" class="text-yellow-400"></i> Formulaire Bon de Réservation
+                </h2>
+                
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Nom & Prénom du Client</label>
+                    <input type="text" id="resa-client" placeholder="Ex: M. Jean DUPONT" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-yellow-400">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="text-[11px] text-slate-400 font-medium">Date de la course</label>
+                        <input type="date" id="resa-date" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-yellow-400" style="color-scheme: dark;">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[11px] text-slate-400 font-medium">Heure de prise en charge</label>
+                        <input type="time" id="resa-time" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs text-white focus:outline-none focus:border-yellow-400" style="color-scheme: dark;">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Adresse de départ (Prise en charge)</label>
+                    <input type="text" id="resa-from" placeholder="Ex: 12 Rue de la Paix, 75002 Paris" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-yellow-400">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Adresse d'arrivée (Destination)</label>
+                    <input type="text" id="resa-to" placeholder="Ex: Aéroport d'Orly, Terminal 4" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-yellow-400">
+                </div>
+                
+                <div class="space-y-1">
+                    <label class="text-[11px] text-slate-400 font-medium">Montant TTC Total (€)</label>
+                    <input type="number" id="resa-price" placeholder="0.00" step="0.01" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-sm font-bold text-yellow-400 focus:outline-none focus:border-yellow-400">
+                </div>
+
+                <button onclick="openBonModal()" class="w-full bg-yellow-500 hover:bg-yellow-400 text-slate-950 font-bold py-3.5 mt-2 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
+                    <i data-lucide="eye" class="w-5 h-5"></i>
+                    Voir & Imprimer le Bon Officiel
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL BON DE RÉSERVATION (APERÇU SUR ÉCRAN + IMPRESSION) -->
+    <div id="bon-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-vtc-900 w-full max-w-2xl rounded-2xl border border-vtc-700 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+            
+            <!-- Modal Header (Masqué à l'impression) -->
+            <div class="p-4 bg-vtc-800 border-b border-vtc-700 flex justify-between items-center no-print">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i data-lucide="file-check" class="text-yellow-400"></i> Aperçu du Bon de Réservation
+                </h3>
+                <button onclick="closeBonModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Zone imprimable officielle -->
+            <div class="overflow-y-auto p-4 sm:p-6 bg-slate-200 text-slate-900 flex-1">
+                <div id="printable-bon" class="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-slate-300 text-slate-900 space-y-6">
+                    
+                    <div class="border-b-2 border-slate-800 pb-4 flex justify-between items-start">
+                        <div>
+                            <h1 class="text-xl font-extrabold text-slate-900 uppercase tracking-tight">BON DE RÉSERVATION</h1>
+                            <p class="text-xs text-slate-500 font-semibold">Justificatif préalable de transport VTC</p>
+                        </div>
+                        <div class="text-right text-xs text-slate-600">
+                            <p>Émis le : <span id="pdf-doc-created">--/--/----</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Grille Société / Client -->
+                    <div class="grid grid-cols-2 gap-4 text-xs">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                            <p class="font-bold text-slate-900 text-sm border-b border-slate-200 pb-1 mb-1">TRANSPORTEUR</p>
+                            <p><strong>Société :</strong> BKTRANSPORT</p>
+                            <p><strong>SIRET :</strong> 84435446400027</p>
+                            <p><strong>Chauffeur :</strong> Anisse</p>
+                            <p><strong>Téléphone :</strong> 07 43 29 99 96</p>
+                            <p><strong>Immatriculation :</strong> EF-842-SJ</p>
+                        </div>
+
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                            <p class="font-bold text-slate-900 text-sm border-b border-slate-200 pb-1 mb-1">PASSAGER / CLIENT</p>
+                            <p><strong>Nom du client :</strong> <span id="pdf-client-name" class="font-bold text-slate-900">--</span></p>
+                            <p><strong>Date course :</strong> <span id="pdf-date">--/--/----</span></p>
+                            <p><strong>Heure charge :</strong> <span id="pdf-time">--:--</span></p>
+                        </div>
+                    </div>
+
+                    <!-- Détails Itinéraire -->
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 text-xs">
+                        <p class="font-bold text-slate-900 text-sm border-b border-slate-200 pb-1 mb-2">DÉTAILS DU TRAJET</p>
+                        <p><strong>Départ (Prise en charge) :</strong></p>
+                        <p id="pdf-from" class="text-slate-800 font-medium pl-2 bg-white p-2 rounded border border-slate-200">--</p>
+                        <p class="pt-1"><strong>Destination (Arrivée) :</strong></p>
+                        <p id="pdf-to" class="text-slate-800 font-medium pl-2 bg-white p-2 rounded border border-slate-200">--</p>
+                    </div>
+
+                    <!-- Ventilation Tarifaire -->
+                    <div class="flex justify-end text-xs">
+                        <div class="w-full sm:w-1/2 bg-slate-900 text-white p-4 rounded-lg space-y-1.5">
+                            <div class="flex justify-between text-slate-300">
+                                <span>Montant HT :</span>
+                                <span id="pdf-ht">0.00 €</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>TVA (10 %) :</span>
+                                <span id="pdf-tva">0.00 €</span>
+                            </div>
+                            <div class="flex justify-between font-extrabold text-base pt-2 border-t border-slate-700 text-yellow-400">
+                                <span>Montant TTC :</span>
+                                <span id="pdf-ttc">0.00 €</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Signatures -->
+                    <div class="grid grid-cols-2 gap-8 pt-4 border-t border-slate-200 text-center text-xs">
+                        <div>
+                            <p class="font-bold text-slate-800 mb-12">Signature Chauffeur</p>
+                            <p class="text-slate-400 border-t border-slate-300 pt-1">Anisse (BKTRANSPORT)</p>
+                        </div>
+                        <div>
+                            <p class="font-bold text-slate-800 mb-12">Signature Client</p>
+                            <p class="text-slate-400 border-t border-slate-300 pt-1" id="pdf-sign-client">Le Passager</p>
+                        </div>
+                    </div>
+
+                    <!-- Mention légale obligatoire -->
+                    <div class="text-[10px] text-slate-500 text-center border-t border-slate-200 pt-3">
+                        Justificatif de réservation préalable établi conformément à l'article R. 3122-10 du Code des transports.
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Action Buttons Footer (Masqué à l'impression) -->
+            <div class="p-4 bg-vtc-800 border-t border-vtc-700 flex flex-wrap gap-2 justify-end no-print">
+                <button onclick="copyBonText()" class="px-3.5 py-2.5 bg-vtc-700 hover:bg-vtc-600 text-white rounded-xl font-medium text-xs flex items-center gap-1.5 transition">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copier Texte (SMS)
+                </button>
+                <button onclick="printBon()" class="px-4 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-slate-950 rounded-xl font-bold text-xs flex items-center gap-1.5 shadow transition">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Imprimer / PDF
+                </button>
+                <button onclick="closeBonModal()" class="px-3 py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl font-medium text-xs transition">
+                    Fermer
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal de confirmation Reset Caisse -->
+    <div id="reset-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-vtc-800 rounded-2xl p-5 border border-vtc-700 max-w-xs w-full space-y-4 text-center">
+            <h3 class="text-sm font-bold text-white">Réinitialiser la journée ?</h3>
+            <p class="text-xs text-slate-400">Toutes les recettes de la journée seront remises à zéro.</p>
+            <div class="flex gap-2">
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 bg-vtc-700 text-white rounded-xl text-xs font-bold">Annuler</button>
+                <button onclick="executeResetDay()" class="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        // Store Local Data
+        let earnings = JSON.parse(localStorage.getItem('vtc_earnings') || '[]');
+        let base64ScanImage = null;
+
+        const geminiApiKey = ""; // Automatiquement injecté en runtime
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${geminiApiKey}`;
+
+        window.onload = () => {
+            lucide.createIcons();
+            
+            // Set current date & time as default
+            const now = new Date();
+            document.getElementById('resa-date').value = now.toISOString().split('T')[0];
+            document.getElementById('resa-time').value = now.toTimeString().substring(0, 5);
+
+            renderEarnings();
+        };
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 3000);
+        }
+
+        // --- NAVIGATION TABS ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(el => {
+                el.classList.remove('text-vtc-brand', 'text-indigo-400', 'text-vtc-accent', 'text-yellow-400');
+                el.classList.add('text-slate-400');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.remove('text-slate-400');
+
+            if(tabId === 'caisse') activeBtn.classList.add('text-vtc-brand');
+            else if(tabId === 'scan') activeBtn.classList.add('text-indigo-400');
+            else if(tabId === 'devis') activeBtn.classList.add('text-vtc-accent');
+            else if(tabId === 'resa') activeBtn.classList.add('text-yellow-400');
+        }
+
+        // --- ONGLET 1: CAISSE ---
+        function addEarning() {
+            const input = document.getElementById('input-amount');
+            const val = parseFloat(input.value.replace(',', '.'));
+
+            if (isNaN(val) || val <= 0) {
+                return showToast("Veuillez saisir un montant valide");
+            }
+
+            const item = {
+                id: Date.now(),
+                amount: val,
+                time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            earnings.unshift(item);
+            saveEarnings();
+            input.value = '';
+            showToast(`+ ${val.toFixed(2)} € enregistré !`);
+        }
+
+        function deleteEarning(id) {
+            earnings = earnings.filter(e => e.id !== id);
+            saveEarnings();
+            showToast("Course supprimée");
+        }
+
+        function confirmResetDay() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function executeResetDay() {
+            earnings = [];
+            saveEarnings();
+            closeResetModal();
+            showToast("Journée réinitialisée à 0.00 €");
+        }
+
+        function saveEarnings() {
+            localStorage.setItem('vtc_earnings', JSON.stringify(earnings));
+            renderEarnings();
+        }
+
+        function renderEarnings() {
+            const list = document.getElementById('earnings-list');
+            const totalEl = document.getElementById('header-total');
+            const countEl = document.getElementById('count-courses');
+
+            let total = 0;
+            list.innerHTML = '';
+
+            if (earnings.length === 0) {
+                list.innerHTML = `<div class="text-center text-slate-500 py-8 text-xs">Aucune recette pour le moment.</div>`;
+            } else {
+                earnings.forEach(e => {
+                    total += e.amount;
+                    const row = document.createElement('div');
+                    row.className = "bg-vtc-800 p-3.5 rounded-xl border border-vtc-700/60 flex justify-between items-center";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="bg-vtc-900 p-2 rounded-lg text-slate-400"><i data-lucide="clock" class="w-4 h-4"></i></div>
+                            <span class="text-slate-300 font-medium text-xs">${e.time}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="font-bold text-base text-white">${e.amount.toFixed(2)} €</span>
+                            <button onclick="deleteEarning(${e.id})" class="text-slate-500 hover:text-red-400 transition p-1">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    list.appendChild(row);
+                });
+                lucide.createIcons();
+            }
+
+            totalEl.innerText = total.toFixed(2);
+            countEl.innerText = `${earnings.length} course${earnings.length > 1 ? 's' : ''}`;
+        }
+
+        // --- ONGLET 2: SCAN IA ---
+        function previewScan(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                const img = document.getElementById('scan-preview');
+                img.src = evt.target.result;
+                img.classList.remove('hidden');
+                document.getElementById('scan-placeholder').classList.add('hidden');
+                document.getElementById('btn-analyze').disabled = false;
+                base64ScanImage = evt.target.result.split(',')[1];
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function analyzeScreenshot() {
+            if (!base64ScanImage) return;
+
+            const btn = document.getElementById('btn-analyze');
+            const resBox = document.getElementById('scan-result-container');
+            const resContent = document.getElementById('scan-result');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Analyse en cours...`;
+            lucide.createIcons();
+
+            const prompt = `Analyse cette capture d'écran de course VTC.
+            - Extrais le montant net chauffeur, la distance et le temps.
+            - Calcule le taux horaire estimé.
+            - Dit si la course est rentable sachant que mon objectif est entre 35€ et 60€/heure (Véhicule: Toyota Auris hybride au bioéthanol E85).
+            - Sois court et clair avec des emojis. Conclus par "VERDICT : ACCEPTER" ou "VERDICT : REFUSER".`;
+
+            try {
+                const response = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            role: "user",
+                            parts: [
+                                { text: prompt },
+                                { inlineData: { mimeType: "image/jpeg", data: base64ScanImage } }
+                            ]
+                        }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Impossible d'analyser cette image.";
+                resContent.innerText = text;
+                resBox.classList.remove('hidden');
+            } catch (err) {
+                showToast("Erreur lors de l'analyse");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5"></i> Analyser la rentabilité`;
+                lucide.createIcons();
+            }
+        }
+
+        // --- ONGLET 3: DEVIS PRIVÉ ---
+        async function generateDevis() {
+            const from = document.getElementById('devis-from').value.trim();
+            const to = document.getElementById('devis-to').value.trim();
+            const demand = document.getElementById('devis-demand').value;
+
+            if (!from || !to) return showToast("Saisissez le départ et la destination");
+
+            const btn = document.getElementById('btn-devis');
+            const resBox = document.getElementById('devis-result-container');
+            const resContent = document.getElementById('devis-result');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Calcul en cours...`;
+            lucide.createIcons();
+
+            const prompt = `Tu es l'assistant de Anisse, chauffeur VTC (BKTRANSPORT, Toyota Auris E85).
+            Départ: ${from}
+            Destination: ${to}
+            Conditions: ${demand}
+
+            Objectif chauffeur : 35€ à 60€ / heure.
+            Propose une estimation de temps, de km et un PRIX DE VENTE TTC conseillé pour un client privé.
+            Sois synthétique, clair et professionnel.`;
+
+            try {
+                const response = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+
+                const data = await response.json();
+                const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "Erreur de génération.";
+                resContent.innerText = text;
+                resBox.classList.remove('hidden');
+            } catch (err) {
+                showToast("Erreur de calcul du devis");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="cpu" class="w-5 h-5"></i> Calculer le Tarif Conseillé`;
+                lucide.createIcons();
+            }
+        }
+
+        // --- ONGLET 4: MODAL & IMPRESSION BON DE RÉSERVATION ---
+        function openBonModal() {
+            const client = document.getElementById('resa-client').value.trim() || 'Client M./Mme';
+            const rawDate = document.getElementById('resa-date').value;
+            const time = document.getElementById('resa-time').value || '--:--';
+            const from = document.getElementById('resa-from').value.trim() || 'Lieu de départ non spécifié';
+            const to = document.getElementById('resa-to').value.trim() || 'Destination non spécifiée';
+            const priceTTC = parseFloat(document.getElementById('resa-price').value.replace(',', '.')) || 0;
+
+            // Date Format DD/MM/YYYY
+            let formattedDate = rawDate;
+            if (rawDate) {
+                const [y, m, d] = rawDate.split('-');
+                formattedDate = `${d}/${m}/${y}`;
+            }
+
+            const priceHT = priceTTC / 1.10;
+            const tva = priceTTC - priceHT;
+
+            // Remplissage des champs dans le modal
+            document.getElementById('pdf-client-name').innerText = client;
+            document.getElementById('pdf-sign-client').innerText = client;
+            document.getElementById('pdf-date').innerText = formattedDate;
+            document.getElementById('pdf-time').innerText = time;
+            document.getElementById('pdf-from').innerText = from;
+            document.getElementById('pdf-to').innerText = to;
+            
+            document.getElementById('pdf-ht').innerText = priceHT.toFixed(2) + ' €';
+            document.getElementById('pdf-tva').innerText = tva.toFixed(2) + ' €';
+            document.getElementById('pdf-ttc').innerText = priceTTC.toFixed(2) + ' €';
+
+            document.getElementById('pdf-doc-created').innerText = new Date().toLocaleDateString('fr-FR');
+
+            document.getElementById('bon-modal').classList.remove('hidden');
+        }
+
+        function closeBonModal() {
+            document.getElementById('bon-modal').classList.add('hidden');
+        }
+
+        function printBon() {
+            window.print();
+        }
+
+        function copyBonText() {
+            const client = document.getElementById('pdf-client-name').innerText;
+            const date = document.getElementById('pdf-date').innerText;
+            const time = document.getElementById('pdf-time').innerText;
+            const from = document.getElementById('pdf-from').innerText;
+            const to = document.getElementById('pdf-to').innerText;
+            const ttc = document.getElementById('pdf-ttc').innerText;
+
+            const summary = `🚕 BON DE RÉSERVATION VTC - BKTRANSPORT
+-----------------------------------
+Client : ${client}
+Date : ${date} à ${time}
+Départ : ${from}
+Destination : ${to}
+-----------------------------------
+Montant TTC : ${ttc} (TVA 10% incluse)
+Chauffeur : Anisse (07 43 29 99 96)
+Véhicule : EF-842-SJ
+SIRET : 84435446400027
+Art. R. 3122-10 du Code des transports`;
+
+            const ta = document.createElement('textarea');
+            ta.value = summary;
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast("Résumé copié dans le presse-papier !");
+            } catch (err) {
+                showToast("Erreur de copie");
+            }
+            document.body.removeChild(ta);
+        }
+    </script>
+
+    <!-- Bottom Navigation -->
+    <nav class="fixed bottom-0 w-full bg-vtc-800 border-t border-vtc-700/80 pb-safe z-20 no-print">
+        <div class="flex justify-around items-center h-16">
+            <button onclick="switchTab('caisse')" class="nav-btn text-vtc-brand flex-1 h-full flex flex-col items-center justify-center gap-1 transition" id="nav-caisse">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Caisse</span>
+            </button>
+            <button onclick="switchTab('scan')" class="nav-btn text-slate-400 flex-1 h-full flex flex-col items-center justify-center gap-1 transition" id="nav-scan">
+                <i data-lucide="scan-line" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Scan IA</span>
+            </button>
+            <button onclick="switchTab('devis')" class="nav-btn text-slate-400 flex-1 h-full flex flex-col items-center justify-center gap-1 transition" id="nav-devis">
+                <i data-lucide="calculator" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Devis Privé</span>
+            </button>
+            <button onclick="switchTab('resa')" class="nav-btn text-slate-400 flex-1 h-full flex flex-col items-center justify-center gap-1 transition" id="nav-resa">
+                <i data-lucide="file-badge" class="w-5 h-5"></i>
+                <span class="text-[10px] font-bold">Bon Résa</span>
+            </button>
+        </div>
+    </nav>
+
+</body>
+</html>
