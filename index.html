@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>LE BON FRÈRE VTC</title>
+    <title>BKTRANSPORT - VTC Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Moteur PDF compatible iOS -->
+    <!-- Moteur PDF vectoriel haute définition -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         tailwind.config = {
@@ -50,7 +50,7 @@
         input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
         input[type="number"] { -moz-appearance: textfield; }
 
-        /* Suppression des en-têtes et pieds de page Safari (URL, date, pagination) */
+        /* Format d'impression A4 pleine page */
         @page {
             size: A4 portrait;
             margin: 0mm;
@@ -67,7 +67,8 @@
                 position: fixed !important;
                 left: 0 !important;
                 top: 0 !important;
-                width: 100% !important;
+                width: 100vw !important;
+                height: 100vh !important;
                 max-width: 100% !important;
                 padding: 15mm !important;
                 margin: 0 !important;
@@ -87,7 +88,7 @@
         <div>
             <div class="flex items-center gap-1.5">
                 <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-[11px] font-extrabold tracking-wider text-slate-300 uppercase">LE BON FRÈRE VTC</span>
+                <span class="text-[11px] font-extrabold tracking-wider text-slate-300 uppercase">BKTRANSPORT</span>
             </div>
             <div class="flex items-baseline gap-1 mt-0.5">
                 <span id="header-day-total" class="text-2xl font-black text-vtc-brand">0.00</span>
@@ -266,7 +267,7 @@
                 <div class="flex justify-between items-center border-b border-vtc-700/60 pb-2">
                     <div class="flex items-center gap-2">
                         <i data-lucide="shield-check" class="w-4 h-4 text-vtc-gold"></i>
-                        <span class="text-xs font-black uppercase tracking-wider text-white">LE BON FRÈRE VTC</span>
+                        <span class="text-xs font-black uppercase tracking-wider text-white">BKTRANSPORT</span>
                     </div>
                     <span class="text-[10px] text-slate-400 font-bold">SIRET: 84435446400027</span>
                 </div>
@@ -356,76 +357,112 @@
     </nav>
 
     <!-- ============================================================== -->
-    <!-- MODAL DU BON DE RÉSERVATION (CADRAGE PARFAIT A4 1 PAGE)       -->
+    <!-- MODAL DU BON DE RÉSERVATION (PLEINE PAGE A4 EXACTE)           -->
     <!-- ============================================================== -->
     <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-4 overflow-y-auto">
-        <div class="bg-vtc-900 w-full max-w-2xl rounded-2xl border border-vtc-700 flex flex-col max-h-[94vh] overflow-hidden shadow-2xl">
+        <div class="bg-vtc-900 w-full max-w-2xl rounded-2xl border border-vtc-700 flex flex-col max-h-[95vh] overflow-hidden shadow-2xl">
             <div class="p-3.5 bg-vtc-850 border-b border-vtc-700 flex justify-between items-center no-print">
                 <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
-                    <i data-lucide="file-badge" class="w-4 h-4 text-vtc-gold"></i> Bon de réservation préalable
+                    <i data-lucide="file-badge" class="w-4 h-4 text-vtc-gold"></i> Bon de réservation préalable - BKTRANSPORT
                 </h3>
                 <button onclick="closeBonModal()" class="text-slate-400 hover:text-white p-1">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
 
-            <!-- Conteneur avec scroll pour l'aperçu écran -->
-            <div class="overflow-y-auto p-3 sm:p-6 bg-slate-300 text-slate-900 flex-1 flex justify-center items-start">
+            <!-- Conteneur défilable de l'aperçu écran -->
+            <div class="overflow-y-auto p-2 sm:p-5 bg-slate-400 text-slate-900 flex-1 flex justify-center items-start">
                 
-                <!-- DOCUMENT BON DE RÉSERVATION : Verrouillé à 760px pour un format A4 exact sur 1 seule page sans débordement -->
-                <div id="printable-bon" style="width: 100%; max-width: 760px; box-sizing: border-box;" class="bg-white p-6 sm:p-8 rounded-xl shadow-xl border border-slate-300 text-slate-900 space-y-4 text-xs leading-relaxed">
+                <!-- BON DE RÉSERVATION FORMATÉ EN PAGE PLEINE A4 PROPORTIONNÉE -->
+                <div id="printable-bon" style="width: 760px; min-height: 1040px; box-sizing: border-box;" class="bg-white p-8 sm:p-10 rounded-xl shadow-2xl border border-slate-300 text-slate-900 flex flex-col justify-between text-xs leading-relaxed">
                     
-                    <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
-                        <div>
-                            <h1 class="text-lg sm:text-xl font-black uppercase text-slate-900 tracking-tight">BON DE RÉSERVATION VTC</h1>
-                            <p class="text-[11px] text-slate-600 font-bold">Justificatif préalable obligatoire de transport</p>
+                    <!-- Haut de page : Titre officiel et date d'émission -->
+                    <div class="space-y-4">
+                        <div class="border-b-4 border-slate-900 pb-4 flex justify-between items-start">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="bg-slate-900 text-white font-black text-xs px-2.5 py-1 rounded">BKTRANSPORT</span>
+                                    <span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">VTC / Transport de Personnes</span>
+                                </div>
+                                <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">BON DE RÉSERVATION VTC</h1>
+                                <p class="text-xs text-slate-600 font-bold">Justificatif préalable obligatoire de transport</p>
+                            </div>
+                            <div class="text-right text-xs text-slate-600 bg-slate-100 p-2.5 rounded-lg border border-slate-200">
+                                <p class="font-bold text-slate-900">RÉSERVATION VTC</p>
+                                <p class="text-[11px]">Émis le : <strong id="modal-date-emission" class="text-slate-900">--/--/----</strong></p>
+                            </div>
                         </div>
-                        <div class="text-right text-[11px] text-slate-600">
-                            <p>Émis le : <span id="modal-date-emission" class="font-bold text-slate-900">--/--/----</span></p>
+
+                        <!-- Grille Transporteur & Client -->
+                        <div class="grid grid-cols-2 gap-4 text-xs pt-1">
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 shadow-sm">
+                                <p class="font-black text-slate-900 uppercase border-b-2 border-slate-300 pb-1 mb-1 text-[11px] tracking-wider">ENTREPRISE DE TRANSPORT</p>
+                                <p><strong>Dénomination :</strong> BKTRANSPORT</p>
+                                <p><strong>SIRET :</strong> 84435446400027</p>
+                                <p><strong>Chauffeur désigné :</strong> <span id="modal-driver-name" class="font-bold text-slate-900">Anisse</span></p>
+                                <p><strong>Téléphone direct :</strong> <span id="modal-driver-phone" class="font-semibold">+33 7 43 29 99 96</span></p>
+                                <p><strong>Immatriculation :</strong> <span id="modal-driver-plate" class="font-black text-slate-900 bg-slate-200 px-1.5 py-0.5 rounded">EF-842-SJ</span></p>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-1.5 shadow-sm">
+                                <p class="font-black text-slate-900 uppercase border-b-2 border-slate-300 pb-1 mb-1 text-[11px] tracking-wider">CLIENT & HORAIRES</p>
+                                <p><strong>Nom / Société :</strong> <span id="modal-client-name" class="font-bold text-slate-900">Client Privé</span></p>
+                                <p><strong>Date de prise en charge :</strong> <span id="modal-travel-date" class="font-semibold text-slate-900">--/--/----</span></p>
+                                <p><strong>Heure convenue :</strong> <span id="modal-travel-time" class="font-bold text-base text-slate-900">--:--</span></p>
+                                <p><strong>Type de prestation :</strong> <span class="font-medium text-slate-700">Course Privée avec Chauffeur</span></p>
+                            </div>
+                        </div>
+
+                        <!-- Détails de la prise en charge et de la destination -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-2 text-xs shadow-sm">
+                            <p class="font-black text-slate-900 uppercase border-b-2 border-slate-300 pb-1 mb-1 text-[11px] tracking-wider">DÉROULEMENT DU TRAJET COMMANDÉ</p>
+                            <div class="space-y-1.5">
+                                <p class="flex items-start gap-2">
+                                    <strong class="min-w-28 text-slate-700">Lieu de départ :</strong> 
+                                    <span id="modal-from" class="font-semibold text-slate-900">--</span>
+                                </p>
+                                <p class="flex items-start gap-2">
+                                    <strong class="min-w-28 text-slate-700">Destination :</strong> 
+                                    <span id="modal-to" class="font-semibold text-slate-900">--</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Bloc Tarifaire HT / TVA / TTC étalé -->
+                        <div class="bg-slate-900 text-white p-5 rounded-xl space-y-2 text-xs shadow-md">
+                            <div class="flex justify-between text-slate-300 border-b border-slate-800 pb-1.5">
+                                <span>Montant des prestations Hors Taxes (HT) :</span>
+                                <span id="modal-price-ht" class="font-bold text-sm">0.00 €</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300 border-b border-slate-800 pb-1.5">
+                                <span>Taxe sur la Valeur Ajoutée (TVA 10 % incluse) :</span>
+                                <span id="modal-price-tva" class="font-bold text-sm">0.00 €</span>
+                            </div>
+                            <div class="flex justify-between items-center font-black text-lg pt-1 text-amber-400">
+                                <span>PRIX FORFAITAIRE TOTAL CONVENU TTC :</span>
+                                <span id="modal-price-ttc" class="text-xl">0.00 €</span>
+                            </div>
+                        </div>
+
+                        <!-- Cadre signature / validation préalable -->
+                        <div class="grid grid-cols-2 gap-4 text-[11px] pt-1">
+                            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                                <p class="font-bold text-slate-700 mb-1">Réservation préalable :</p>
+                                <p class="text-[10px] text-slate-500">Commande validée préalablement par moyen de télécommunication avant le début de la prise en charge.</p>
+                            </div>
+                            <div class="border border-slate-200 rounded-lg p-3 bg-slate-50">
+                                <p class="font-bold text-slate-700 mb-1">Cachet / Mention du transporteur :</p>
+                                <p class="text-[10px] text-slate-500 font-semibold uppercase">BKTRANSPORT - Service VTC Agréé</p>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4 text-xs">
-                        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-1">
-                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">TRANSPORTEUR</p>
-                            <p><strong>Société :</strong> LE BON FRÈRE VTC</p>
-                            <p><strong>SIRET :</strong> 84435446400027</p>
-                            <p><strong>Chauffeur :</strong> <span id="modal-driver-name" class="font-bold text-slate-900">Anisse</span></p>
-                            <p><strong>Téléphone :</strong> <span id="modal-driver-phone" class="font-medium">+33 7 43 29 99 96</span></p>
-                            <p><strong>Immatriculation :</strong> <span id="modal-driver-plate" class="font-bold text-slate-900">EF-842-SJ</span></p>
-                        </div>
-                        <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-1">
-                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">CLIENT / PASSAGER</p>
-                            <p><strong>Nom :</strong> <span id="modal-client-name" class="font-bold text-slate-900">Client Privé</span></p>
-                            <p><strong>Date :</strong> <span id="modal-travel-date" class="font-medium text-slate-900">--/--/----</span></p>
-                            <p><strong>Heure de départ :</strong> <span id="modal-travel-time" class="font-medium text-slate-900">--:--</span></p>
-                        </div>
+                    <!-- Pied de page légal réglementaire obligatoire -->
+                    <div class="border-t-2 border-slate-200 pt-3 text-[10px] text-slate-500 text-center space-y-0.5">
+                        <p class="font-bold text-slate-700">BKTRANSPORT • SIRET 84435446400027</p>
+                        <p>Document justificatif de réservation préalable établi conformément aux dispositions de l'article R. 3122-10 du Code des transports.</p>
                     </div>
 
-                    <div class="bg-slate-50 p-3.5 rounded-lg border border-slate-200 space-y-1.5 text-xs">
-                        <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">DÉROULEMENT DU TRAJET</p>
-                        <p><strong>Prise en charge :</strong> <span id="modal-from" class="font-medium text-slate-800">--</span></p>
-                        <p><strong>Destination :</strong> <span id="modal-to" class="font-medium text-slate-800">--</span></p>
-                    </div>
-
-                    <div class="bg-slate-900 text-white p-4 rounded-lg space-y-1.5 text-xs">
-                        <div class="flex justify-between text-slate-300">
-                            <span>Prix Hors Taxes (HT) :</span>
-                            <span id="modal-price-ht" class="font-bold">0.00 €</span>
-                        </div>
-                        <div class="flex justify-between text-slate-300">
-                            <span>TVA (10 %) :</span>
-                            <span id="modal-price-tva" class="font-bold">0.00 €</span>
-                        </div>
-                        <div class="flex justify-between font-black text-base pt-1.5 border-t border-slate-700 text-amber-400">
-                            <span>Total TTC convenu :</span>
-                            <span id="modal-price-ttc">0.00 €</span>
-                        </div>
-                    </div>
-
-                    <p class="text-[9px] text-slate-500 text-center border-t border-slate-200 pt-2.5">
-                        Document valant justificatif de réservation préalable conformément aux dispositions de l'article R. 3122-10 du Code des transports.
-                    </p>
                 </div>
             </div>
 
@@ -954,20 +991,20 @@
             document.getElementById('bon-modal').classList.add('hidden');
         }
 
-        // ====== EXPORT ET PARTAGE DU FICHIER PDF (CADRAGE A4 1 PAGE SANS AUCUNE URL) ======
+        // ====== EXPORT DU BON AU FORMAT EXACT PLEINE PAGE A4 ======
         async function exportOrSharePDF() {
             const element = document.getElementById('printable-bon');
             const clientName = (document.getElementById('modal-client-name').innerText || 'Client').replace(/[^a-zA-Z0-9]/g, '_');
-            const filename = `Bon_Reservation_LEBONFRERE_${clientName}.pdf`;
+            const filename = `Bon_Reservation_BKTRANSPORT_${clientName}.pdf`;
             const btn = document.getElementById('btn-export-pdf');
 
             btn.disabled = true;
             btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Génération...`;
             if (window.lucide) lucide.createIcons();
 
-            // Configuration pour un cadrage A4 exact sur 1 seule page sans coupure
+            // Calibrage exact pour que le PDF remplisse la page entière A4 sans marge excessive ni coupure
             const opt = {
-                margin:       [12, 12, 12, 12],
+                margin:       [0, 0, 0, 0],
                 filename:     filename,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { 
@@ -975,9 +1012,9 @@
                     useCORS: true, 
                     logging: false,
                     scrollY: 0,
-                    windowWidth: 800
+                    width: 760
                 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                jsPDF:        { unit: 'px', format: [760, 1075], orientation: 'portrait' }
             };
 
             try {
@@ -991,7 +1028,7 @@
                         await navigator.share({
                             files: [pdfFile],
                             title: 'Bon de réservation VTC',
-                            text: 'Bon de réservation préalable VTC - LE BON FRÈRE VTC'
+                            text: 'Bon de réservation préalable VTC - BKTRANSPORT'
                         });
                         shared = true;
                         showToast("PDF partagé avec succès !");
@@ -1008,7 +1045,7 @@
                     if (!win) {
                         await worker.save();
                     }
-                    showToast("PDF généré !");
+                    showToast("PDF généré plein format !");
                 }
             } catch (err) {
                 showToast("Erreur lors de la génération");
@@ -1040,7 +1077,7 @@
 `🚕 *BON DE RÉSERVATION PRÉALABLE VTC*
 _Conforme à l'article R. 3122-10 du Code des transports_
 
-• *Société :* LE BON FRÈRE VTC (SIRET 84435446400027)
+• *Société :* BKTRANSPORT (SIRET 84435446400027)
 • *Chauffeur :* ${driver.name} (${driver.phone})
 ${plateLine}• *Passager :* ${client}
 • *Prise en charge :* ${formattedDate} à ${time}
