@@ -83,7 +83,7 @@
         </button>
     </header>
 
-    <!-- Zone de contenu avec scroll libre -->
+    <!-- Zone de contenu -->
     <main class="flex-1 overflow-y-auto pb-28 px-4 pt-3 max-w-lg mx-auto w-full">
 
         <!-- Notification Toast -->
@@ -97,7 +97,6 @@
         <!-- ============================================================== -->
         <section id="panel-caisse" class="tab-panel active space-y-4">
             
-            <!-- Saisie d'une course -->
             <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg">
                 <label class="block text-center text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Encaisser une course</label>
                 <div class="relative mb-3">
@@ -118,7 +117,7 @@
                 </button>
             </div>
 
-            <!-- Graphique hebdomadaire basé sur les tranches 04h-04h -->
+            <!-- Graphique hebdomadaire -->
             <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg">
                 <div class="flex justify-between items-center mb-2">
                     <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Activité de la semaine</h3>
@@ -127,15 +126,13 @@
                 <div id="chart-week" class="w-full h-32 flex items-end justify-between gap-1 pt-3 pb-1"></div>
             </div>
 
-            <!-- Liste des courses du shift actuel -->
+            <!-- Liste des courses du shift -->
             <div class="space-y-2">
                 <div class="flex justify-between items-center px-1">
                     <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Courses du jour en cours</h3>
                     <span id="count-shift-courses" class="text-xs font-bold text-slate-400">0 course</span>
                 </div>
-                <div id="shift-courses-list" class="space-y-2">
-                    <!-- Rempli en JS -->
-                </div>
+                <div id="shift-courses-list" class="space-y-2"></div>
             </div>
         </section>
 
@@ -149,7 +146,7 @@
                     <i data-lucide="calculator" class="w-5 h-5 text-vtc-accent"></i>
                     <div>
                         <h2 class="text-sm font-bold text-white">Calculateur de Devis Privé</h2>
-                        <p class="text-[10px] text-slate-400">Routage automatique, affluence et majoration personnalisée</p>
+                        <p class="text-[10px] text-slate-400">Routage automatique, affluence et coefficient</p>
                     </div>
                 </div>
 
@@ -170,7 +167,7 @@
                     </div>
                 </div>
 
-                <!-- Date et heure prévues -->
+                <!-- Date et heure -->
                 <div class="grid grid-cols-2 gap-2 pt-1">
                     <div>
                         <label class="text-[10px] font-bold text-slate-300">Date prévue</label>
@@ -182,7 +179,7 @@
                     </div>
                 </div>
 
-                <!-- Niveau d'affluence -->
+                <!-- Affluence -->
                 <div class="space-y-1 pt-1">
                     <div class="flex justify-between items-center">
                         <label class="text-[11px] font-bold text-slate-300">Niveau d'affluence / Demande</label>
@@ -219,7 +216,7 @@
                 <div id="route-indicator" class="text-[10px] text-slate-400 text-center"></div>
             </div>
 
-            <!-- Résultat & Choix d'une formule -->
+            <!-- Résultat & Formules -->
             <div id="devis-results" class="hidden bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3.5">
                 <div class="grid grid-cols-3 gap-2 text-center border-b border-vtc-700/60 pb-3">
                     <div class="bg-vtc-900 p-2 rounded-xl">
@@ -238,11 +235,8 @@
 
                 <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Sélectionnez une formule pour le client :</h3>
                 
-                <div id="offers-list" class="space-y-2">
-                    <!-- Rempli en JS avec 3 formules (Standard, Confort, Express Majoré) -->
-                </div>
+                <div id="offers-list" class="space-y-2"></div>
 
-                <!-- Bouton de bascule vers le Bon de Réservation -->
                 <button onclick="generateBonFromSelectedOffer()" id="btn-transfer-bon" disabled class="w-full bg-vtc-gold hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black py-3.5 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2">
                     <i data-lucide="file-check" class="w-5 h-5"></i> Générer le bon de réservation
                 </button>
@@ -254,7 +248,7 @@
         <!-- ============================================================== -->
         <section id="panel-resa" class="tab-panel space-y-4">
             
-            <!-- Carte Chauffeur & Société -->
+            <!-- Carte Chauffeur & Société avec plaque dynamique -->
             <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
                 <div class="flex justify-between items-center border-b border-vtc-700/60 pb-2">
                     <div class="flex items-center gap-2">
@@ -264,19 +258,19 @@
                     <span class="text-[10px] text-slate-400 font-bold">SIRET: 84435446400027</span>
                 </div>
 
-                <!-- Sélection du chauffeur parmi les 3 demandés -->
+                <!-- Sélecteur de chauffeur -->
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-slate-300">Chauffeur en charge du transport :</label>
                     <select id="select-driver" onchange="onDriverSelected()" class="w-full bg-vtc-900 border-2 border-vtc-gold/60 focus:border-vtc-gold rounded-xl p-3 text-sm font-bold text-white outline-none">
-                        <option value="0">Anisse (+33 7 43 29 99 96)</option>
-                        <option value="1">Hedi (+33 7 66 60 32 65)</option>
-                        <option value="2">Amine (+33 6 65 64 65 32)</option>
+                        <option value="0">Anisse (07 43 29 99 96 • EF-842-SJ)</option>
+                        <option value="1">Hedi (07 66 60 32 65 • GY-071-CL)</option>
+                        <option value="2">Amine (06 65 64 65 32 • Sans plaque)</option>
                     </select>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2 text-[11px] bg-vtc-900/80 p-2.5 rounded-xl border border-vtc-700/50">
                     <p class="text-slate-300">• Tél: <strong id="card-driver-phone" class="text-white">+33 7 43 29 99 96</strong></p>
-                    <p class="text-slate-300">• Immat: <strong class="text-white">EF-842-SJ</strong></p>
+                    <p class="text-slate-300">• Immat: <strong id="card-driver-plate" class="text-white">EF-842-SJ</strong></p>
                     <p class="text-slate-300">• TVA: <strong class="text-white">10 % (Inclus)</strong></p>
                     <p class="text-slate-300">• Statut: <strong class="text-emerald-400">Conforme R.3122-10</strong></p>
                 </div>
@@ -332,9 +326,7 @@
 
     </main>
 
-    <!-- ============================================================== -->
-    <!-- BARRE DE NAVIGATION INFÉRIEURE (FIXÉE SUR 3 ONGLETS)           -->
-    <!-- ============================================================== -->
+    <!-- Navigation inférieure -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 bg-vtc-850/98 border-t border-vtc-700/80 backdrop-blur pb-safe no-print">
         <div class="max-w-lg mx-auto flex justify-around items-stretch h-16">
             <button type="button" onclick="switchTab('caisse')" id="nav-btn-caisse" class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-1 text-slate-400 transition nav-active">
@@ -352,9 +344,7 @@
         </div>
     </nav>
 
-    <!-- ============================================================== -->
-    <!-- MODAL DU BON DE RÉSERVATION IMPRIMABLE & LÉGAL                 -->
-    <!-- ============================================================== -->
+    <!-- Modal du Bon de réservation imprimable -->
     <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="bg-vtc-900 w-full max-w-xl rounded-2xl border border-vtc-700 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
             <div class="p-3.5 bg-vtc-850 border-b border-vtc-700 flex justify-between items-center no-print">
@@ -385,7 +375,7 @@
                             <p><strong>SIRET :</strong> 84435446400027</p>
                             <p><strong>Chauffeur :</strong> <span id="modal-driver-name" class="font-bold text-slate-900">Anisse</span></p>
                             <p><strong>Téléphone :</strong> <span id="modal-driver-phone" class="font-medium">+33 7 43 29 99 96</span></p>
-                            <p><strong>Immatriculation :</strong> EF-842-SJ</p>
+                            <p><strong>Immatriculation :</strong> <span id="modal-driver-plate" class="font-bold text-slate-900">EF-842-SJ</span></p>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
                             <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">CLIENT / PASSAGER</p>
@@ -433,7 +423,7 @@
         </div>
     </div>
 
-    <!-- MODAL DE CONFIRMATION RESET JOUR 04h-04h -->
+    <!-- Modal confirmation Reset 4h-4h -->
     <div id="reset-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="bg-vtc-850 rounded-2xl p-5 border border-vtc-700 max-w-xs w-full space-y-3.5 text-center shadow-2xl">
             <h3 class="text-sm font-extrabold text-white">Réinitialiser la tranche 04h-04h ?</h3>
@@ -445,18 +435,13 @@
         </div>
     </div>
 
-    <!-- ============================================================== -->
-    <!-- SCRIPT DE FONCTIONNEMENT COMPLET                              -->
-    <!-- ============================================================== -->
+    <!-- Scripts -->
     <script>
-        // Clé Google Maps facultative : si laissée vide, le calculateur utilise automatiquement l'API OpenRoute/OSRM gratuite.
-        const GOOGLE_MAPS_API_KEY = "";
-
-        // Chauffeurs configurés
+        // Chauffeurs et leurs immatriculations respectives
         const DRIVERS = [
-            { name: "Anisse", phone: "+33 7 43 29 99 96" },
-            { name: "Hedi",   phone: "+33 7 66 60 32 65" },
-            { name: "Amine",  phone: "+33 6 65 64 65 32" }
+            { name: "Anisse", phone: "+33 7 43 29 99 96", plate: "EF-842-SJ" },
+            { name: "Hedi",   phone: "+33 7 66 60 32 65", plate: "GY-071-CL" },
+            { name: "Amine",  phone: "+33 6 65 64 65 32", plate: "En attente" }
         ];
 
         // Facteurs d'affluence
@@ -473,7 +458,6 @@
         let selectedOfferIndex = null;
         let lastRouteComputed = null;
 
-        // ====== INITIALISATION ======
         window.addEventListener('DOMContentLoaded', () => {
             if (window.lucide) lucide.createIcons();
             loadCoursesFromStorage();
@@ -507,7 +491,6 @@
             setTimeout(() => toast.classList.add('opacity-0'), 2500);
         }
 
-        // ====== NAVIGATION PAR ONGLETS ======
         function switchTab(tabId) {
             document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('nav-active'));
@@ -520,9 +503,26 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // ====== GESTION DE LA CAISSE (TRANCHE 04h00 -> 04h00) ======
-        // En soustrayant 4h au timestamp, une course à 02h30 du matin tombe mathématiquement
-        // dans le shift de la veille (jour J), garantissant la tranche 4h -> 4h.
+        // ====== GESTION DU CHAUFFEUR ET DE LA PLAQUE ======
+        function getActiveDriver() {
+            const idx = parseInt(document.getElementById('select-driver').value, 10);
+            return DRIVERS[idx] || DRIVERS[0];
+        }
+
+        function onDriverSelected() {
+            const driver = getActiveDriver();
+            
+            // Mise à jour de la carte chauffeur
+            document.getElementById('card-driver-phone').innerText = driver.phone;
+            document.getElementById('card-driver-plate').innerText = driver.plate;
+
+            // Mise à jour de l'aperçu du bon officiel
+            document.getElementById('modal-driver-name').innerText = driver.name;
+            document.getElementById('modal-driver-phone').innerText = driver.phone;
+            document.getElementById('modal-driver-plate').innerText = driver.plate;
+        }
+
+        // ====== GESTION CAISSE 04H00 -> 04H00 ======
         function getShiftKey(timestamp) {
             const shifted = new Date(timestamp - (4 * 3600 * 1000));
             return formatDateForInput(shifted);
@@ -530,7 +530,6 @@
 
         function getShiftDayOfWeek(timestamp) {
             const shifted = new Date(timestamp - (4 * 3600 * 1000));
-            // 0 = Lundi, 6 = Dimanche
             return (shifted.getDay() + 6) % 7;
         }
 
@@ -646,7 +645,6 @@
             document.getElementById('header-week-total').innerText = `${weekSum.toFixed(2)} €`;
             document.getElementById('count-shift-courses').innerText = `${shiftCourses.length} course${shiftCourses.length > 1 ? 's' : ''}`;
 
-            // Liste des courses
             const listEl = document.getElementById('shift-courses-list');
             listEl.innerHTML = '';
 
@@ -707,7 +705,7 @@
             });
         }
 
-        // ====== DEVIS PRIVÉ, CALCULATEUR ET ITINÉRAIRE ======
+        // ====== DEVIS ET TARIFS ======
         function getEffectiveCoef() {
             const manual = parseFloat(document.getElementById('devis-coef-manual').value);
             if (!isNaN(manual) && manual > 0) return manual;
@@ -736,12 +734,9 @@
 
         function detectAutoAffluence(dateObj) {
             const hour = dateObj.getHours();
-            const day = dateObj.getDay(); // 0=Dimanche, 5=Vendredi, 6=Samedi
-            // Nuits du weekend
+            const day = dateObj.getDay();
             if ((day === 5 || day === 6) && (hour >= 22 || hour < 5)) return 'tres_forte';
-            // Heures de pointe semaine
             if (day >= 1 && day <= 5 && ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 20))) return 'forte';
-            // Creux de nuit en semaine
             if (hour >= 1 && hour < 6) return 'faible';
             return 'normale';
         }
@@ -756,13 +751,11 @@
             }
         }
 
-        // Géocodage et routage automatique (OSRM gratuit sans clé, ou estimation de secours)
         async function fetchRouteDistanceTime(fromText, toText, depDate) {
             const indicator = document.getElementById('route-indicator');
             indicator.innerText = "Calcul de l'itinéraire en cours...";
 
             try {
-                // Tentative via OpenStreetMap Nominatim + OSRM
                 const geo1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fromText + ' France')}`).then(r => r.json());
                 const geo2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(toText + ' France')}`).then(r => r.json());
 
@@ -773,23 +766,19 @@
                     if (osrm && osrm.routes && osrm.routes.length > 0) {
                         const distKm = osrm.routes[0].distance / 1000;
                         let durationMin = osrm.routes[0].duration / 60;
-                        // Correction de trafic selon l'heure
                         const h = depDate.getHours();
                         if ((h >= 7 && h <= 9) || (h >= 17 && h <= 20)) durationMin *= 1.35;
-                        indicator.innerText = "✓ Itinéraire routier calculé en temps réel";
-                        return { km: distKm, minutes: Math.round(durationMin), source: 'reel' };
+                        indicator.innerText = "✓ Itinéraire calculé en temps réel";
+                        return { km: distKm, minutes: Math.round(durationMin) };
                     }
                 }
-            } catch (err) {
-                // Fallback direct
-            }
+            } catch (err) {}
 
-            // Estimation locale robuste si pas de réseau ou lieu introuvable
-            indicator.innerText = "✓ Estimation rapide basée sur la distance";
+            indicator.innerText = "✓ Estimation rapide de distance";
             const mockKm = Math.floor(14 + ((fromText.length + toText.length) % 26));
             const h = depDate.getHours();
             const traffic = ((h >= 7 && h <= 9) || (h >= 17 && h <= 20)) ? 1.4 : 1.15;
-            return { km: mockKm, minutes: Math.round(mockKm * 2.1 * traffic), source: 'estime' };
+            return { km: mockKm, minutes: Math.round(mockKm * 2.1 * traffic) };
         }
 
         async function computeOffers() {
@@ -810,15 +799,11 @@
 
             const route = await fetchRouteDistanceTime(from, to, depDate);
 
-            // Détermination affluence
             const affSelect = document.getElementById('devis-affluence').value;
             const affKey = affSelect === 'auto' ? detectAutoAffluence(depDate) : affSelect;
             const aff = AFFLUENCE_FACTORS[affKey];
-
-            // Coefficient multiplicateur choisi par le chauffeur
             const coef = getEffectiveCoef();
 
-            // Formule de rentabilité VTC (Base + km + temps)
             const baseFare = 4.00 + (route.km * 1.25) + (route.minutes * 0.40);
             const standardPrice = Math.max(Math.round(baseFare * 1.10 * aff.coef * coef), 20);
             const confortPrice = Math.round(standardPrice * 1.20);
@@ -830,7 +815,7 @@
                 {
                     id: 'standard',
                     name: 'Course Standard (Éco)',
-                    desc: 'Berline hybride classique, rentabilité garantie',
+                    desc: 'Berline classique, tarif optimisé',
                     price: standardPrice,
                     rate: Math.round(standardPrice / (route.minutes / 60))
                 },
@@ -850,7 +835,6 @@
                 }
             ];
 
-            // Mise à jour de l'affichage
             document.getElementById('metric-dist').innerText = `${route.km.toFixed(1)} km`;
             document.getElementById('metric-time').innerText = `${route.minutes} min`;
             document.getElementById('metric-affluence').innerText = `${aff.label} (×${aff.coef})`;
@@ -907,32 +891,17 @@
 
             const offer = calculatedOffers[selectedOfferIndex];
 
-            // Remplissage automatique des champs du Bon de Réservation
             document.getElementById('resa-from').value = lastRouteComputed.from;
             document.getElementById('resa-to').value = lastRouteComputed.to;
             document.getElementById('resa-date').value = lastRouteComputed.dateStr;
             document.getElementById('resa-time').value = lastRouteComputed.timeStr;
             document.getElementById('resa-price').value = offer.price.toFixed(2);
 
-            // Bascule sur l'onglet Bon Résa
             switchTab('resa');
             showToast(`Bon pré-rempli : ${offer.name} (${offer.price} €)`);
         }
 
-        // ====== GESTION DU CHAUFFEUR & DU BON DE RÉSERVATION ======
-        function onDriverSelected() {
-            const idx = parseInt(document.getElementById('select-driver').value, 10);
-            const driver = DRIVERS[idx] || DRIVERS[0];
-            document.getElementById('card-driver-phone').innerText = driver.phone;
-            document.getElementById('modal-driver-name').innerText = driver.name;
-            document.getElementById('modal-driver-phone').innerText = driver.phone;
-        }
-
-        function getActiveDriver() {
-            const idx = parseInt(document.getElementById('select-driver').value, 10);
-            return DRIVERS[idx] || DRIVERS[0];
-        }
-
+        // ====== MODAL DU BON ET PARTAGE ======
         function openBonModal() {
             const driver = getActiveDriver();
             const client = document.getElementById('resa-client').value.trim() || 'Client Privé';
@@ -953,6 +922,7 @@
 
             document.getElementById('modal-driver-name').innerText = driver.name;
             document.getElementById('modal-driver-phone').innerText = driver.phone;
+            document.getElementById('modal-driver-plate').innerText = driver.plate;
             document.getElementById('modal-client-name').innerText = client;
             document.getElementById('modal-travel-date').innerText = formattedDate;
             document.getElementById('modal-travel-time').innerText = time;
@@ -986,15 +956,15 @@
                 formattedDate = `${d}/${m}/${y}`;
             }
 
+            const plateLine = (driver.plate && driver.plate !== "En attente") ? `• *Immatriculation :* ${driver.plate}\n` : '';
+
             const text = 
 `🚕 *BON DE RÉSERVATION PRÉALABLE VTC*
 _Conforme à l'article R. 3122-10 du Code des transports_
 
 • *Société :* LE BON FRÈRE VTC (SIRET 84435446400027)
 • *Chauffeur :* ${driver.name} (${driver.phone})
-• *Véhicule :* Toyota Auris (EF-842-SJ)
-
-• *Passager :* ${client}
+${plateLine}• *Passager :* ${client}
 • *Prise en charge :* ${formattedDate} à ${time}
 • *Départ :* ${from}
 • *Destination :* ${to}
