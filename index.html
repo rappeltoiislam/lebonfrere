@@ -62,7 +62,7 @@
 </head>
 <body class="bg-vtc-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-vtc-brand selection:text-black">
 
-    <!-- En-tête de l'application -->
+    <!-- En-tête -->
     <header class="sticky top-0 z-30 bg-vtc-850/95 backdrop-blur border-b border-vtc-700/60 px-4 py-3 shadow-md flex justify-between items-center">
         <div>
             <div class="flex items-center gap-1.5">
@@ -83,10 +83,10 @@
         </button>
     </header>
 
-    <!-- Zone de contenu -->
+    <!-- Contenu scrollable -->
     <main class="flex-1 overflow-y-auto pb-28 px-4 pt-3 max-w-lg mx-auto w-full">
 
-        <!-- Notification Toast -->
+        <!-- Toast -->
         <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 bg-slate-900 text-white border border-vtc-brand/60 px-4 py-2 rounded-full shadow-2xl text-xs font-bold transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
             <i data-lucide="check-circle" class="w-4 h-4 text-vtc-brand"></i>
             <span id="toast-text">Action enregistrée</span>
@@ -104,7 +104,6 @@
                     <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-lg">€</span>
                 </div>
 
-                <!-- Canaux VTC -->
                 <div class="grid grid-cols-4 gap-2 mb-3">
                     <button type="button" onclick="selectChannel('Uber')" id="btn-chan-Uber" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Uber</button>
                     <button type="button" onclick="selectChannel('Bolt')" id="btn-chan-Bolt" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Bolt</button>
@@ -126,7 +125,7 @@
                 <div id="chart-week" class="w-full h-32 flex items-end justify-between gap-1 pt-3 pb-1"></div>
             </div>
 
-            <!-- Liste des courses du shift -->
+            <!-- Courses du shift -->
             <div class="space-y-2">
                 <div class="flex justify-between items-center px-1">
                     <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Courses du jour en cours</h3>
@@ -216,7 +215,7 @@
                 <div id="route-indicator" class="text-[10px] text-slate-400 text-center"></div>
             </div>
 
-            <!-- Résultat & Formules -->
+            <!-- Résultats & Formules -->
             <div id="devis-results" class="hidden bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3.5">
                 <div class="grid grid-cols-3 gap-2 text-center border-b border-vtc-700/60 pb-3">
                     <div class="bg-vtc-900 p-2 rounded-xl">
@@ -248,7 +247,7 @@
         <!-- ============================================================== -->
         <section id="panel-resa" class="tab-panel space-y-4">
             
-            <!-- Carte Chauffeur & Société avec plaque dynamique -->
+            <!-- Carte Chauffeur & Société -->
             <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
                 <div class="flex justify-between items-center border-b border-vtc-700/60 pb-2">
                     <div class="flex items-center gap-2">
@@ -258,12 +257,12 @@
                     <span class="text-[10px] text-slate-400 font-bold">SIRET: 84435446400027</span>
                 </div>
 
-                <!-- Sélecteur de chauffeur -->
+                <!-- Sélecteur de chauffeur mis à jour -->
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-slate-300">Chauffeur en charge du transport :</label>
                     <select id="select-driver" onchange="onDriverSelected()" class="w-full bg-vtc-900 border-2 border-vtc-gold/60 focus:border-vtc-gold rounded-xl p-3 text-sm font-bold text-white outline-none">
                         <option value="0">Anisse (07 43 29 99 96 • EF-842-SJ)</option>
-                        <option value="1">Hedi (07 66 60 32 65 • GY-071-CL)</option>
+                        <option value="1">Hedi (07 66 60 32 65 • GY-071-CM)</option>
                         <option value="2">Amine (06 65 64 65 32 • Sans plaque)</option>
                     </select>
                 </div>
@@ -326,7 +325,7 @@
 
     </main>
 
-    <!-- Navigation inférieure -->
+    <!-- Navigation basse -->
     <nav class="fixed bottom-0 left-0 right-0 z-40 bg-vtc-850/98 border-t border-vtc-700/80 backdrop-blur pb-safe no-print">
         <div class="max-w-lg mx-auto flex justify-around items-stretch h-16">
             <button type="button" onclick="switchTab('caisse')" id="nav-btn-caisse" class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-1 text-slate-400 transition nav-active">
@@ -344,7 +343,7 @@
         </div>
     </nav>
 
-    <!-- Modal du Bon de réservation imprimable -->
+    <!-- Modal Bon officiel imprimable -->
     <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         <div class="bg-vtc-900 w-full max-w-xl rounded-2xl border border-vtc-700 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
             <div class="p-3.5 bg-vtc-850 border-b border-vtc-700 flex justify-between items-center no-print">
@@ -435,16 +434,15 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    <!-- Script de l'application -->
     <script>
-        // Chauffeurs et leurs immatriculations respectives
+        // Configuration des chauffeurs et de leurs plaques
         const DRIVERS = [
             { name: "Anisse", phone: "+33 7 43 29 99 96", plate: "EF-842-SJ" },
-            { name: "Hedi",   phone: "+33 7 66 60 32 65", plate: "GY-071-CL" },
+            { name: "Hedi",   phone: "+33 7 66 60 32 65", plate: "GY-071-CM" },
             { name: "Amine",  phone: "+33 6 65 64 65 32", plate: "En attente" }
         ];
 
-        // Facteurs d'affluence
         const AFFLUENCE_FACTORS = {
             faible:     { label: "Faible",      coef: 0.95 },
             normale:    { label: "Normale",     coef: 1.00 },
@@ -503,7 +501,7 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // ====== GESTION DU CHAUFFEUR ET DE LA PLAQUE ======
+        // ====== CHAUFFEUR ET PLAQUE ======
         function getActiveDriver() {
             const idx = parseInt(document.getElementById('select-driver').value, 10);
             return DRIVERS[idx] || DRIVERS[0];
@@ -511,18 +509,14 @@
 
         function onDriverSelected() {
             const driver = getActiveDriver();
-            
-            // Mise à jour de la carte chauffeur
             document.getElementById('card-driver-phone').innerText = driver.phone;
             document.getElementById('card-driver-plate').innerText = driver.plate;
-
-            // Mise à jour de l'aperçu du bon officiel
             document.getElementById('modal-driver-name').innerText = driver.name;
             document.getElementById('modal-driver-phone').innerText = driver.phone;
             document.getElementById('modal-driver-plate').innerText = driver.plate;
         }
 
-        // ====== GESTION CAISSE 04H00 -> 04H00 ======
+        // ====== CAISSE 04H00 -> 04H00 ======
         function getShiftKey(timestamp) {
             const shifted = new Date(timestamp - (4 * 3600 * 1000));
             return formatDateForInput(shifted);
@@ -705,7 +699,7 @@
             });
         }
 
-        // ====== DEVIS ET TARIFS ======
+        // ====== DEVIS & FORMULES ======
         function getEffectiveCoef() {
             const manual = parseFloat(document.getElementById('devis-coef-manual').value);
             if (!isNaN(manual) && manual > 0) return manual;
@@ -901,7 +895,7 @@
             showToast(`Bon pré-rempli : ${offer.name} (${offer.price} €)`);
         }
 
-        // ====== MODAL DU BON ET PARTAGE ======
+        // ====== MODAL DU BON ======
         function openBonModal() {
             const driver = getActiveDriver();
             const client = document.getElementById('resa-client').value.trim() || 'Client Privé';
