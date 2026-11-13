@@ -6,6 +6,8 @@
     <title>LE BON FRÈRE VTC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Moteur de génération PDF professionnel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -83,7 +85,7 @@
         </button>
     </header>
 
-    <!-- Contenu scrollable -->
+    <!-- Zone principale -->
     <main class="flex-1 overflow-y-auto pb-28 px-4 pt-3 max-w-lg mx-auto w-full">
 
         <!-- Toast -->
@@ -125,7 +127,7 @@
                 <div id="chart-week" class="w-full h-32 flex items-end justify-between gap-1 pt-3 pb-1"></div>
             </div>
 
-            <!-- Courses du shift -->
+            <!-- Liste des courses du shift -->
             <div class="space-y-2">
                 <div class="flex justify-between items-center px-1">
                     <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Courses du jour en cours</h3>
@@ -215,7 +217,7 @@
                 <div id="route-indicator" class="text-[10px] text-slate-400 text-center"></div>
             </div>
 
-            <!-- Résultats & Formules -->
+            <!-- Résultats & Choix d'une formule -->
             <div id="devis-results" class="hidden bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3.5">
                 <div class="grid grid-cols-3 gap-2 text-center border-b border-vtc-700/60 pb-3">
                     <div class="bg-vtc-900 p-2 rounded-xl">
@@ -243,11 +245,10 @@
         </section>
 
         <!-- ============================================================== -->
-        <!-- ONGLET 3 : BON DE RÉSERVATION & CHOIX CHAUFFEUR               -->
+        <!-- ONGLET 3 : BON DE RÉSERVATION & CHOIX DU CHAUFFEUR            -->
         <!-- ============================================================== -->
         <section id="panel-resa" class="tab-panel space-y-4">
             
-            <!-- Carte Chauffeur & Société -->
             <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
                 <div class="flex justify-between items-center border-b border-vtc-700/60 pb-2">
                     <div class="flex items-center gap-2">
@@ -257,7 +258,7 @@
                     <span class="text-[10px] text-slate-400 font-bold">SIRET: 84435446400027</span>
                 </div>
 
-                <!-- Sélecteur de chauffeur mis à jour -->
+                <!-- Sélecteur de chauffeur -->
                 <div class="space-y-1">
                     <label class="text-[11px] font-bold text-slate-300">Chauffeur en charge du transport :</label>
                     <select id="select-driver" onchange="onDriverSelected()" class="w-full bg-vtc-900 border-2 border-vtc-gold/60 focus:border-vtc-gold rounded-xl p-3 text-sm font-bold text-white outline-none">
@@ -317,7 +318,7 @@
                         <i data-lucide="copy" class="w-4 h-4"></i> Copier texte
                     </button>
                     <button onclick="openBonModal()" class="bg-vtc-gold hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
-                        <i data-lucide="eye" class="w-4 h-4"></i> Voir le Bon officiel
+                        <i data-lucide="eye" class="w-4 h-4"></i> Voir & Exporter Bon
                     </button>
                 </div>
             </div>
@@ -343,9 +344,11 @@
         </div>
     </nav>
 
-    <!-- Modal Bon officiel imprimable -->
-    <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        <div class="bg-vtc-900 w-full max-w-xl rounded-2xl border border-vtc-700 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+    <!-- ============================================================== -->
+    <!-- MODAL DU BON DE RÉSERVATION AVEC EXPORT PDF & PARTAGE         -->
+    <!-- ============================================================== -->
+    <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-2 sm:p-6 overflow-y-auto">
+        <div class="bg-vtc-900 w-full max-w-xl rounded-2xl border border-vtc-700 flex flex-col max-h-[94vh] overflow-hidden shadow-2xl">
             <div class="p-3.5 bg-vtc-850 border-b border-vtc-700 flex justify-between items-center no-print">
                 <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
                     <i data-lucide="file-badge" class="w-4 h-4 text-vtc-gold"></i> Bon de réservation préalable
@@ -355,12 +358,14 @@
                 </button>
             </div>
 
-            <div class="overflow-y-auto p-4 bg-slate-200 text-slate-900 flex-1">
-                <div id="printable-bon" class="bg-white p-6 rounded-xl shadow-md border border-slate-300 text-slate-900 space-y-4">
+            <!-- Aperçu de la feuille A4 -->
+            <div class="overflow-y-auto p-3 sm:p-5 bg-slate-300 text-slate-900 flex-1 flex justify-center">
+                <div id="printable-bon" class="bg-white p-5 sm:p-7 rounded-xl shadow-lg border border-slate-300 text-slate-900 space-y-4 w-full max-w-lg text-xs leading-normal">
+                    
                     <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
                         <div>
-                            <h1 class="text-lg font-black uppercase text-slate-900 tracking-tight">BON DE RÉSERVATION VTC</h1>
-                            <p class="text-[11px] text-slate-600 font-bold">Justificatif préalable obligatoire de transport</p>
+                            <h1 class="text-base sm:text-lg font-black uppercase text-slate-900 tracking-tight">BON DE RÉSERVATION VTC</h1>
+                            <p class="text-[10px] text-slate-600 font-bold">Justificatif préalable obligatoire de transport</p>
                         </div>
                         <div class="text-right text-[10px] text-slate-600">
                             <p>Émis le : <span id="modal-date-emission" class="font-bold">--/--/----</span></p>
@@ -369,7 +374,7 @@
 
                     <div class="grid grid-cols-2 gap-3 text-xs">
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
-                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">TRANSPORTEUR</p>
+                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[10px]">TRANSPORTEUR</p>
                             <p><strong>Société :</strong> LE BON FRÈRE VTC</p>
                             <p><strong>SIRET :</strong> 84435446400027</p>
                             <p><strong>Chauffeur :</strong> <span id="modal-driver-name" class="font-bold text-slate-900">Anisse</span></p>
@@ -377,7 +382,7 @@
                             <p><strong>Immatriculation :</strong> <span id="modal-driver-plate" class="font-bold text-slate-900">EF-842-SJ</span></p>
                         </div>
                         <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
-                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">CLIENT / PASSAGER</p>
+                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[10px]">CLIENT / PASSAGER</p>
                             <p><strong>Nom :</strong> <span id="modal-client-name" class="font-bold text-slate-900">Client Privé</span></p>
                             <p><strong>Date :</strong> <span id="modal-travel-date" class="font-medium">--/--/----</span></p>
                             <p><strong>Heure prise en charge :</strong> <span id="modal-travel-time" class="font-medium">--:--</span></p>
@@ -385,12 +390,12 @@
                     </div>
 
                     <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1 text-xs">
-                        <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">DÉROULEMENT DU TRAJET</p>
+                        <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[10px]">DÉROULEMENT DU TRAJET</p>
                         <p><strong>Prise en charge :</strong> <span id="modal-from" class="font-medium text-slate-800">--</span></p>
                         <p><strong>Destination :</strong> <span id="modal-to" class="font-medium text-slate-800">--</span></p>
                     </div>
 
-                    <div class="bg-slate-900 text-white p-3.5 rounded-lg space-y-1 text-xs">
+                    <div class="bg-slate-900 text-white p-3 rounded-lg space-y-1 text-xs">
                         <div class="flex justify-between text-slate-300">
                             <span>Prix Hors Taxes (HT) :</span>
                             <span id="modal-price-ht" class="font-bold">0.00 €</span>
@@ -399,24 +404,28 @@
                             <span>TVA (10 %) :</span>
                             <span id="modal-price-tva" class="font-bold">0.00 €</span>
                         </div>
-                        <div class="flex justify-between font-black text-base pt-1.5 border-t border-slate-700 text-amber-400">
+                        <div class="flex justify-between font-black text-sm pt-1 border-t border-slate-700 text-amber-400">
                             <span>Total TTC convenu :</span>
                             <span id="modal-price-ttc">0.00 €</span>
                         </div>
                     </div>
 
-                    <p class="text-[9px] text-slate-500 text-center border-t border-slate-200 pt-2">
+                    <p class="text-[8px] text-slate-500 text-center border-t border-slate-200 pt-2">
                         Document valant justificatif de réservation préalable conformément aux dispositions de l'article R. 3122-10 du Code des transports.
                     </p>
                 </div>
             </div>
 
-            <div class="p-3 bg-vtc-850 border-t border-vtc-700 flex justify-end gap-2 no-print">
-                <button onclick="copyBonWhatsApp()" class="px-4 py-2 bg-vtc-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i data-lucide="copy" class="w-4 h-4"></i> Copier texte
+            <!-- Barre d'action avec Partage/Téléchargement PDF natif -->
+            <div class="p-3 bg-vtc-850 border-t border-vtc-700 flex flex-wrap justify-end gap-2 no-print">
+                <button onclick="copyBonWhatsApp()" class="px-3.5 py-2 bg-vtc-700 hover:bg-slate-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Texte
                 </button>
-                <button onclick="window.print()" class="px-4 py-2 bg-vtc-gold text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow">
+                <button onclick="window.print()" class="px-3.5 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
                     <i data-lucide="printer" class="w-4 h-4"></i> Imprimer
+                </button>
+                <button id="btn-export-pdf" onclick="exportOrSharePDF()" class="px-4 py-2 bg-vtc-gold hover:bg-amber-400 text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow transition active:scale-95">
+                    <i data-lucide="share" class="w-4 h-4"></i> Partager PDF
                 </button>
             </div>
         </div>
@@ -436,7 +445,6 @@
 
     <!-- Script de l'application -->
     <script>
-        // Configuration des chauffeurs et de leurs plaques
         const DRIVERS = [
             { name: "Anisse", phone: "+33 7 43 29 99 96", plate: "EF-842-SJ" },
             { name: "Hedi",   phone: "+33 7 66 60 32 65", plate: "GY-071-CM" },
@@ -699,7 +707,7 @@
             });
         }
 
-        // ====== DEVIS & FORMULES ======
+        // ====== DEVIS & TARIFS ======
         function getEffectiveCoef() {
             const manual = parseFloat(document.getElementById('devis-coef-manual').value);
             if (!isNaN(manual) && manual > 0) return manual;
@@ -895,7 +903,7 @@
             showToast(`Bon pré-rempli : ${offer.name} (${offer.price} €)`);
         }
 
-        // ====== MODAL DU BON ======
+        // ====== GESTION DU MODAL DU BON ======
         function openBonModal() {
             const driver = getActiveDriver();
             const client = document.getElementById('resa-client').value.trim() || 'Client Privé';
@@ -933,6 +941,59 @@
 
         function closeBonModal() {
             document.getElementById('bon-modal').classList.add('hidden');
+        }
+
+        // ====== EXPORT ET PARTAGE DU VRAI FICHIER PDF ======
+        async function exportOrSharePDF() {
+            const element = document.getElementById('printable-bon');
+            const clientName = (document.getElementById('modal-client-name').innerText || 'Client').replace(/[^a-zA-Z0-9]/g, '_');
+            const filename = `Bon_Reservation_VTC_${clientName}.pdf`;
+            const btn = document.getElementById('btn-export-pdf');
+
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Génération...`;
+            if (window.lucide) lucide.createIcons();
+
+            const opt = {
+                margin:       [10, 10, 10, 10],
+                filename:     filename,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            try {
+                // Création du Blob PDF
+                const worker = html2pdf().set(opt).from(element);
+                const pdfBlob = await worker.output('blob');
+                const pdfFile = new File([pdfBlob], filename, { type: 'application/pdf' });
+
+                // Si le navigateur supporte le partage de fichier (iPhone Safari / Android)
+                if (navigator.canShare && navigator.canShare({ files: [pdfFile] })) {
+                    await navigator.share({
+                        files: [pdfFile],
+                        title: 'Bon de réservation VTC',
+                        text: `Bon de réservation VTC - LE BON FRÈRE VTC`
+                    });
+                    showToast("PDF partagé avec succès !");
+                } else {
+                    // Téléchargement direct si sur ordinateur ou partage non supporté
+                    await worker.save();
+                    showToast("PDF téléchargé !");
+                }
+            } catch (err) {
+                // Secours en cas d'annulation du partage ou d'erreur
+                try {
+                    await html2pdf().set(opt).from(element).save();
+                    showToast("PDF téléchargé dans vos fichiers !");
+                } catch (e) {
+                    showToast("Erreur lors de la génération du PDF");
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i data-lucide="share" class="w-4 h-4"></i> Partager PDF`;
+                if (window.lucide) lucide.createIcons();
+            }
         }
 
         async function copyBonWhatsApp() {
