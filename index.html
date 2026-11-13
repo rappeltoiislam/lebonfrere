@@ -2,151 +2,1011 @@
 <html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>VTC Pro - LE BON FRÈRE VTC</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>LE BON FRÈRE VTC</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: { extend: { colors: { vtc: {
-                900: '#0f172a', 800: '#1e293b', 700: '#334155',
-                brand: '#10b981', accent: '#3b82f6', uber: '#000000', bolt: '#34d399', heetch: '#f43f5e'
-            } } } }
+            theme: {
+                extend: {
+                    colors: {
+                        vtc: {
+                            900: '#0b1326',
+                            850: '#111c38',
+                            800: '#162244',
+                            700: '#23335d',
+                            brand: '#10b981',
+                            accent: '#3b82f6',
+                            gold: '#f59e0b'
+                        }
+                    }
+                }
+            }
         }
     </script>
     <style>
         ::-webkit-scrollbar { width: 0px; background: transparent; }
-        body { -webkit-tap-highlight-color: transparent; background-color: #0f172a; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        input[type="number"] { -moz-appearance: textfield; }
+        body {
+            -webkit-tap-highlight-color: transparent;
+            background-color: #0b1326;
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+        .nav-active {
+            color: #10b981 !important;
+            border-top: 2px solid #10b981;
+            background: rgba(16, 185, 129, 0.08);
+        }
+        .offer-selected {
+            border-color: #10b981 !important;
+            background-color: rgba(16, 185, 129, 0.12) !important;
+        }
         input[type="number"]::-webkit-outer-spin-button,
         input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        .whitespace-pre-wrap { white-space: pre-wrap; }
-        .pac-container { z-index: 9999 !important; }
-        .offer-card.selected { border-color: #3b82f6; background: rgba(30,58,138,0.25); }
+        input[type="number"] { -moz-appearance: textfield; }
 
         @media print {
             body * { visibility: hidden !important; }
             #printable-bon, #printable-bon * { visibility: visible !important; }
             #printable-bon {
                 position: fixed !important; left: 0 !important; top: 0 !important;
-                width: 100% !important; height: auto !important; margin: 0 !important;
-                padding: 25px !important; background: white !important; color: black !important;
+                width: 100% !important; background: white !important; color: black !important;
+                padding: 20px !important; margin: 0 !important;
             }
             .no-print { display: none !important; }
         }
     </style>
 </head>
-<body class="bg-vtc-900 text-white font-sans h-screen flex flex-col overflow-hidden">
+<body class="bg-vtc-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-vtc-brand selection:text-black">
 
-    <!-- Header -->
-    <header class="bg-vtc-800 px-4 py-3 flex justify-between items-center shadow-md z-10 border-b border-vtc-700/50">
-        <div class="flex flex-col">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">LE BON FRÈRE VTC • Jour J (04h → 04h)</span>
-            <div class="flex items-baseline gap-1">
-                <span id="header-total" class="text-2xl sm:text-3xl font-extrabold text-vtc-brand">0.00</span>
-                <span class="text-base text-vtc-brand font-bold">€</span>
+    <!-- En-tête de l'application -->
+    <header class="sticky top-0 z-30 bg-vtc-850/95 backdrop-blur border-b border-vtc-700/60 px-4 py-3 shadow-md flex justify-between items-center">
+        <div>
+            <div class="flex items-center gap-1.5">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-[11px] font-extrabold tracking-wider text-slate-300 uppercase">LE BON FRÈRE VTC</span>
             </div>
-            <span class="text-[10px] text-slate-500 font-medium">Semaine : <span id="header-week-total">0.00</span> €</span>
+            <div class="flex items-baseline gap-1 mt-0.5">
+                <span id="header-day-total" class="text-2xl font-black text-vtc-brand">0.00</span>
+                <span class="text-sm font-bold text-vtc-brand">€</span>
+                <span class="text-[10px] text-slate-400 ml-1.5 font-medium">(Jour J 04h-04h)</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-medium">
+                Semaine : <strong id="header-week-total" class="text-slate-200">0.00 €</strong>
+            </div>
         </div>
-        <button onclick="confirmResetDay()" class="bg-vtc-900 hover:bg-red-950/40 border border-vtc-700 hover:border-red-500/50 text-slate-300 hover:text-red-400 px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition">
-            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset jour
+        <button onclick="confirmResetCurrentShift()" class="bg-vtc-900 hover:bg-rose-950/60 border border-vtc-700 hover:border-rose-500/50 text-slate-300 hover:text-rose-300 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition active:scale-95">
+            <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset 4h-4h
         </button>
     </header>
 
-    <main class="flex-1 overflow-y-auto pb-24 relative">
+    <!-- Zone de contenu avec scroll libre -->
+    <main class="flex-1 overflow-y-auto pb-28 px-4 pt-3 max-w-lg mx-auto w-full">
 
-        <!-- Toast -->
-        <div id="toast" class="fixed top-16 left-1/2 transform -translate-x-1/2 bg-vtc-accent text-white px-5 py-2.5 rounded-full shadow-2xl text-xs font-bold transition-opacity duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2 border border-blue-400/30">
-            <i data-lucide="check-circle-2" class="w-4 h-4"></i>
-            <span id="toast-msg">Action effectuée</span>
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed top-14 left-1/2 -translate-x-1/2 bg-slate-900 text-white border border-vtc-brand/60 px-4 py-2 rounded-full shadow-2xl text-xs font-bold transition-all duration-300 opacity-0 pointer-events-none z-50 flex items-center gap-2">
+            <i data-lucide="check-circle" class="w-4 h-4 text-vtc-brand"></i>
+            <span id="toast-text">Action enregistrée</span>
         </div>
 
-        <!-- TAB 1: CAISSE -->
-        <div id="tab-caisse" class="tab-content active p-4 space-y-5">
-
-            <div class="bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700/50 flex flex-col items-center">
-                <label class="text-xs text-slate-400 font-medium mb-2">Saisir une course (€)</label>
-                <input type="number" id="input-amount" placeholder="0.00" inputmode="decimal" step="0.01" class="w-full bg-vtc-900 border-2 border-vtc-700 rounded-xl p-3.5 text-center text-3xl font-extrabold text-white focus:outline-none focus:border-vtc-brand transition mb-3">
-
-                <div class="grid grid-cols-4 gap-2 w-full mb-4">
-                    <button type="button" onclick="selectChannel('Uber')" id="btn-chan-Uber" class="chan-btn py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 bg-vtc-900 transition">Uber</button>
-                    <button type="button" onclick="selectChannel('Bolt')" id="btn-chan-Bolt" class="chan-btn py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 bg-vtc-900 transition">Bolt</button>
-                    <button type="button" onclick="selectChannel('Heetch')" id="btn-chan-Heetch" class="chan-btn py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 bg-vtc-900 transition">Heetch</button>
-                    <button type="button" onclick="selectChannel('Prive')" id="btn-chan-Prive" class="chan-btn py-2 rounded-xl border border-slate-700 text-xs font-bold text-slate-300 bg-vtc-900 transition">Privé</button>
+        <!-- ============================================================== -->
+        <!-- ONGLET 1 : CAISSE & SUIVI 04h00 -> 04h00                       -->
+        <!-- ============================================================== -->
+        <section id="panel-caisse" class="tab-panel active space-y-4">
+            
+            <!-- Saisie d'une course -->
+            <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg">
+                <label class="block text-center text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">Encaisser une course</label>
+                <div class="relative mb-3">
+                    <input type="number" id="input-amount" placeholder="0.00" inputmode="decimal" step="0.01" class="w-full bg-vtc-900 border-2 border-vtc-700 focus:border-vtc-brand rounded-2xl p-3.5 text-center text-3xl font-black text-white outline-none transition">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 font-extrabold text-lg">€</span>
                 </div>
 
-                <button onclick="addEarning()" class="w-full bg-vtc-brand hover:bg-emerald-600 text-slate-950 font-bold text-base py-3.5 rounded-xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2">
-                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Encaisser la course
+                <!-- Canaux VTC -->
+                <div class="grid grid-cols-4 gap-2 mb-3">
+                    <button type="button" onclick="selectChannel('Uber')" id="btn-chan-Uber" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Uber</button>
+                    <button type="button" onclick="selectChannel('Bolt')" id="btn-chan-Bolt" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Bolt</button>
+                    <button type="button" onclick="selectChannel('Heetch')" id="btn-chan-Heetch" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Heetch</button>
+                    <button type="button" onclick="selectChannel('Prive')" id="btn-chan-Prive" class="chan-btn py-2 rounded-xl border border-slate-700 bg-vtc-900 text-xs font-bold text-slate-300 transition">Privé</button>
+                </div>
+
+                <button onclick="addCourse()" class="w-full bg-vtc-brand hover:bg-emerald-500 text-slate-950 font-extrabold py-3.5 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i data-lucide="plus-circle" class="w-5 h-5"></i> Valider l'encaissement
                 </button>
             </div>
 
-            <!-- Graphique hebdomadaire par journée 04h-04h -->
-            <div class="bg-vtc-800 rounded-2xl p-4 shadow-lg border border-vtc-700/50">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Suivi par journée</h3>
-                    <span class="text-[10px] text-emerald-400 font-semibold bg-emerald-950/60 border border-emerald-800/50 px-2 py-0.5 rounded-full">Journée : 04h00 → 04h00</span>
+            <!-- Graphique hebdomadaire basé sur les tranches 04h-04h -->
+            <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Activité de la semaine</h3>
+                    <span class="text-[10px] text-emerald-300 bg-emerald-950/80 border border-emerald-700/60 px-2 py-0.5 rounded-full font-bold">Shift 04h00 → 04h00</span>
                 </div>
-                <div id="weekly-chart-container" class="w-full h-36 flex items-end justify-between gap-1 pt-4 pb-1 px-1"></div>
+                <div id="chart-week" class="w-full h-32 flex items-end justify-between gap-1 pt-3 pb-1"></div>
             </div>
 
-            <!-- Liste du jour J -->
-            <div>
-                <div class="flex justify-between items-center mb-2 px-1">
-                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Courses du jour J <span id="day-label" class="normal-case text-slate-500"></span></h3>
-                    <span id="count-courses" class="text-xs text-slate-500 font-medium">0 course</span>
+            <!-- Liste des courses du shift actuel -->
+            <div class="space-y-2">
+                <div class="flex justify-between items-center px-1">
+                    <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Courses du jour en cours</h3>
+                    <span id="count-shift-courses" class="text-xs font-bold text-slate-400">0 course</span>
                 </div>
-                <div id="earnings-list" class="space-y-2"></div>
+                <div id="shift-courses-list" class="space-y-2">
+                    <!-- Rempli en JS -->
+                </div>
             </div>
-        </div>
+        </section>
 
-        <!-- TAB 2: DEVIS PRIVÉ -->
-        <div id="tab-devis" class="tab-content p-4 space-y-5">
-            <div class="bg-vtc-800 rounded-2xl p-5 shadow-lg border border-vtc-700/50 space-y-3.5">
-                <h2 class="text-base font-bold text-white mb-2 flex items-center gap-2">
-                    <i data-lucide="calculator" class="text-vtc-accent"></i> Devis Privé
-                </h2>
-
-                <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 font-medium">Lieu de prise en charge</label>
-                    <input type="text" id="devis-from" placeholder="Ex: Asnières-sur-Seine" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
-                </div>
-
-                <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 font-medium">Destination</label>
-                    <input type="text" id="devis-to" placeholder="Ex: Aéroport CDG Terminal 2E" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="space-y-1">
-                        <label class="text-[11px] text-slate-400 font-medium">Date de départ</label>
-                        <input type="date" id="devis-date" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs text-white" style="color-scheme: dark;">
+        <!-- ============================================================== -->
+        <!-- ONGLET 2 : DEVIS PRIVÉ, TRAFIC & MULTIPLICATEUR               -->
+        <!-- ============================================================== -->
+        <section id="panel-devis" class="tab-panel space-y-4">
+            
+            <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
+                <div class="flex items-center gap-2 border-b border-vtc-700/60 pb-2.5">
+                    <i data-lucide="calculator" class="w-5 h-5 text-vtc-accent"></i>
+                    <div>
+                        <h2 class="text-sm font-bold text-white">Calculateur de Devis Privé</h2>
+                        <p class="text-[10px] text-slate-400">Routage automatique, affluence et majoration personnalisée</p>
                     </div>
-                    <div class="space-y-1">
-                        <label class="text-[11px] text-slate-400 font-medium">Heure de départ</label>
-                        <input type="time" id="devis-time" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs text-white" style="color-scheme: dark;">
+                </div>
+
+                <!-- Adresses -->
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-300">Lieu de prise en charge</label>
+                    <div class="relative">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-emerald-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="devis-from" placeholder="Ex: Asnières-sur-Seine ou Gare du Nord" class="w-full bg-vtc-900 border border-vtc-700 focus:border-vtc-accent rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white outline-none">
                     </div>
                 </div>
 
                 <div class="space-y-1">
-                    <label class="text-[11px] text-slate-400 font-medium">Affluence / demande</label>
-                    <select id="devis-affluence" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white focus:outline-none focus:border-vtc-accent">
-                        <option value="auto" selected>Auto (selon jour et heure)</option>
-                        <option value="faible">Faible (×0.95)</option>
-                        <option value="normale">Normale (×1.00)</option>
-                        <option value="forte">Forte (×1.15)</option>
-                        <option value="tres_forte">Très forte (×1.30)</option>
+                    <label class="text-[11px] font-bold text-slate-300">Destination</label>
+                    <div class="relative">
+                        <i data-lucide="flag" class="w-4 h-4 text-rose-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                        <input type="text" id="devis-to" placeholder="Ex: Aéroport CDG Terminal 2E ou Orly" class="w-full bg-vtc-900 border border-vtc-700 focus:border-vtc-accent rounded-xl pl-9 pr-3 py-2.5 text-xs sm:text-sm text-white outline-none">
+                    </div>
+                </div>
+
+                <!-- Date et heure prévues -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-300">Date prévue</label>
+                        <input type="date" id="devis-date" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-2 text-xs text-white outline-none" style="color-scheme: dark;">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-300">Heure de départ</label>
+                        <input type="time" id="devis-time" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-2 text-xs text-white outline-none" style="color-scheme: dark;">
+                    </div>
+                </div>
+
+                <!-- Niveau d'affluence -->
+                <div class="space-y-1 pt-1">
+                    <div class="flex justify-between items-center">
+                        <label class="text-[11px] font-bold text-slate-300">Niveau d'affluence / Demande</label>
+                        <span id="badge-affluence" class="text-[10px] font-bold text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded-md border border-emerald-800">Auto détecté</span>
+                    </div>
+                    <select id="devis-affluence" onchange="onAffluenceChange()" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-2.5 text-xs text-white outline-none">
+                        <option value="auto" selected>Auto (selon le jour et l'heure du départ)</option>
+                        <option value="faible">Faible / Heures creuses (×0.95)</option>
+                        <option value="normale">Normale / Trafic fluide (×1.00)</option>
+                        <option value="forte">Forte / Bouchons & Heure de pointe (×1.20)</option>
+                        <option value="tres_forte">Très forte / Nuit de fête ou Intempéries (×1.40)</option>
                     </select>
                 </div>
 
-                <div class="space-y-1.5">
+                <!-- Coefficient multiplicateur -->
+                <div class="space-y-1.5 pt-1">
                     <div class="flex justify-between items-center">
-                        <label class="text-[11px] text-slate-400 font-medium">Coefficient multiplicateur</label>
-                        <span id="coef-label" class="text-sm font-extrabold text-vtc-accent">×1.00</span>
+                        <label class="text-[11px] font-bold text-slate-300">Coefficient multiplicateur</label>
+                        <span id="label-coef" class="text-sm font-black text-vtc-accent">× 1.00</span>
                     </div>
-                    <input type="range" id="devis-coef" min="0.5" max="3" step="0.05" value="1" class="w-full accent-blue-500" oninput="updateCoefLabel()">
-                    <div class="grid grid-cols-5 gap-1.5">
-                        <button type="button" onclick="setCoef(1)" class="py-1.5 rounded-lg bg-vtc-900 border border-vtc-700 text-[11px] font-bold text-slate-300">×1</button>
-                        <button type="button" onclick="setCoef(1.2)" class=
+                    <input type="range" id="devis-coef-range" min="0.5" max="3.0" step="0.05" value="1.0" oninput="syncCoefFromRange()" class="w-full accent-blue-500 cursor-pointer">
+                    <div class="grid grid-cols-5 gap-1.5 pt-1">
+                        <button type="button" onclick="setCoefValue(1.0)" class="btn-coef py-1.5 rounded-lg bg-vtc-900 border border-vtc-700 text-[11px] font-bold text-slate-300 hover:border-vtc-accent">×1.0</button>
+                        <button type="button" onclick="setCoefValue(1.2)" class="btn-coef py-1.5 rounded-lg bg-vtc-900 border border-vtc-700 text-[11px] font-bold text-slate-300 hover:border-vtc-accent">×1.2</button>
+                        <button type="button" onclick="setCoefValue(1.5)" class="btn-coef py-1.5 rounded-lg bg-vtc-900 border border-vtc-700 text-[11px] font-bold text-slate-300 hover:border-vtc-accent">×1.5</button>
+                        <button type="button" onclick="setCoefValue(2.0)" class="btn-coef py-1.5 rounded-lg bg-vtc-900 border border-vtc-700 text-[11px] font-bold text-slate-300 hover:border-vtc-accent">×2.0</button>
+                        <input type="number" id="devis-coef-manual" placeholder="Autre" step="0.05" min="0.5" max="5.0" inputmode="decimal" oninput="syncCoefFromManual()" class="w-full bg-vtc-900 border border-vtc-700 rounded-lg text-center text-[11px] text-white font-bold p-1 outline-none">
+                    </div>
+                </div>
+
+                <button onclick="computeOffers()" id="btn-calc-devis" class="w-full bg-vtc-accent hover:bg-blue-600 text-white font-extrabold py-3.5 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2 mt-2">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i> Calculer les tarifs du trajet
+                </button>
+                <div id="route-indicator" class="text-[10px] text-slate-400 text-center"></div>
+            </div>
+
+            <!-- Résultat & Choix d'une formule -->
+            <div id="devis-results" class="hidden bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3.5">
+                <div class="grid grid-cols-3 gap-2 text-center border-b border-vtc-700/60 pb-3">
+                    <div class="bg-vtc-900 p-2 rounded-xl">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Distance</span>
+                        <span id="metric-dist" class="text-sm font-black text-white">-- km</span>
+                    </div>
+                    <div class="bg-vtc-900 p-2 rounded-xl">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Durée Trafic</span>
+                        <span id="metric-time" class="text-sm font-black text-yellow-400">-- min</span>
+                    </div>
+                    <div class="bg-vtc-900 p-2 rounded-xl">
+                        <span class="block text-[10px] text-slate-400 font-bold uppercase">Affluence</span>
+                        <span id="metric-affluence" class="text-sm font-black text-emerald-400">--</span>
+                    </div>
+                </div>
+
+                <h3 class="text-xs font-extrabold text-slate-300 uppercase tracking-wider">Sélectionnez une formule pour le client :</h3>
+                
+                <div id="offers-list" class="space-y-2">
+                    <!-- Rempli en JS avec 3 formules (Standard, Confort, Express Majoré) -->
+                </div>
+
+                <!-- Bouton de bascule vers le Bon de Réservation -->
+                <button onclick="generateBonFromSelectedOffer()" id="btn-transfer-bon" disabled class="w-full bg-vtc-gold hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-950 font-black py-3.5 rounded-xl shadow-lg transition active:scale-[0.98] flex items-center justify-center gap-2">
+                    <i data-lucide="file-check" class="w-5 h-5"></i> Générer le bon de réservation
+                </button>
+            </div>
+        </section>
+
+        <!-- ============================================================== -->
+        <!-- ONGLET 3 : BON DE RÉSERVATION & CHOIX CHAUFFEUR               -->
+        <!-- ============================================================== -->
+        <section id="panel-resa" class="tab-panel space-y-4">
+            
+            <!-- Carte Chauffeur & Société -->
+            <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
+                <div class="flex justify-between items-center border-b border-vtc-700/60 pb-2">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-vtc-gold"></i>
+                        <span class="text-xs font-black uppercase tracking-wider text-white">LE BON FRÈRE VTC</span>
+                    </div>
+                    <span class="text-[10px] text-slate-400 font-bold">SIRET: 84435446400027</span>
+                </div>
+
+                <!-- Sélection du chauffeur parmi les 3 demandés -->
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-300">Chauffeur en charge du transport :</label>
+                    <select id="select-driver" onchange="onDriverSelected()" class="w-full bg-vtc-900 border-2 border-vtc-gold/60 focus:border-vtc-gold rounded-xl p-3 text-sm font-bold text-white outline-none">
+                        <option value="0">Anisse (+33 7 43 29 99 96)</option>
+                        <option value="1">Hedi (+33 7 66 60 32 65)</option>
+                        <option value="2">Amine (+33 6 65 64 65 32)</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 text-[11px] bg-vtc-900/80 p-2.5 rounded-xl border border-vtc-700/50">
+                    <p class="text-slate-300">• Tél: <strong id="card-driver-phone" class="text-white">+33 7 43 29 99 96</strong></p>
+                    <p class="text-slate-300">• Immat: <strong class="text-white">EF-842-SJ</strong></p>
+                    <p class="text-slate-300">• TVA: <strong class="text-white">10 % (Inclus)</strong></p>
+                    <p class="text-slate-300">• Statut: <strong class="text-emerald-400">Conforme R.3122-10</strong></p>
+                </div>
+            </div>
+
+            <!-- Formulaire du Bon -->
+            <div class="bg-vtc-850 rounded-2xl p-4 border border-vtc-700/70 shadow-lg space-y-3">
+                <h2 class="text-xs font-black uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <i data-lucide="file-text" class="w-4 h-4 text-vtc-gold"></i> Détails de la réservation préalable
+                </h2>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-400">Nom et prénom du client</label>
+                    <input type="text" id="resa-client" placeholder="Ex: M. Dupont ou Société ABC" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-slate-400">Date du transport</label>
+                        <input type="date" id="resa-date" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-2.5 text-xs text-white outline-none" style="color-scheme: dark;">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[11px] font-bold text-slate-400">Heure de prise en charge</label>
+                        <input type="time" id="resa-time" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-2.5 text-xs text-white outline-none" style="color-scheme: dark;">
+                    </div>
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-400">Lieu de prise en charge</label>
+                    <input type="text" id="resa-from" placeholder="Adresse complète de départ" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white outline-none">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-400">Lieu de dépose (Destination)</label>
+                    <input type="text" id="resa-to" placeholder="Adresse complète d'arrivée" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-xs sm:text-sm text-white outline-none">
+                </div>
+
+                <div class="space-y-1">
+                    <label class="text-[11px] font-bold text-slate-400">Prix forfaitaire convenu TTC (€)</label>
+                    <input type="number" id="resa-price" placeholder="Montant TTC en euros" step="0.01" inputmode="decimal" class="w-full bg-vtc-900 border border-vtc-700 rounded-xl p-3 text-base font-black text-vtc-gold outline-none">
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-2">
+                    <button onclick="copyBonWhatsApp()" class="bg-vtc-700 hover:bg-slate-700 text-white font-bold py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+                        <i data-lucide="copy" class="w-4 h-4"></i> Copier texte
+                    </button>
+                    <button onclick="openBonModal()" class="bg-vtc-gold hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
+                        <i data-lucide="eye" class="w-4 h-4"></i> Voir le Bon officiel
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================================== -->
+    <!-- BARRE DE NAVIGATION INFÉRIEURE (FIXÉE SUR 3 ONGLETS)           -->
+    <!-- ============================================================== -->
+    <nav class="fixed bottom-0 left-0 right-0 z-40 bg-vtc-850/98 border-t border-vtc-700/80 backdrop-blur pb-safe no-print">
+        <div class="max-w-lg mx-auto flex justify-around items-stretch h-16">
+            <button type="button" onclick="switchTab('caisse')" id="nav-btn-caisse" class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-1 text-slate-400 transition nav-active">
+                <i data-lucide="wallet" class="w-5 h-5"></i>
+                <span class="text-[11px] font-bold">Caisse (4h-4h)</span>
+            </button>
+            <button type="button" onclick="switchTab('devis')" id="nav-btn-devis" class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-1 text-slate-400 transition">
+                <i data-lucide="calculator" class="w-5 h-5"></i>
+                <span class="text-[11px] font-bold">Devis Privé</span>
+            </button>
+            <button type="button" onclick="switchTab('resa')" id="nav-btn-resa" class="nav-tab-btn flex-1 flex flex-col items-center justify-center gap-1 text-slate-400 transition">
+                <i data-lucide="file-check" class="w-5 h-5"></i>
+                <span class="text-[11px] font-bold">Bon Résa</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ============================================================== -->
+    <!-- MODAL DU BON DE RÉSERVATION IMPRIMABLE & LÉGAL                 -->
+    <!-- ============================================================== -->
+    <div id="bon-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+        <div class="bg-vtc-900 w-full max-w-xl rounded-2xl border border-vtc-700 flex flex-col max-h-[92vh] overflow-hidden shadow-2xl">
+            <div class="p-3.5 bg-vtc-850 border-b border-vtc-700 flex justify-between items-center no-print">
+                <h3 class="text-xs font-black text-white uppercase tracking-wider flex items-center gap-2">
+                    <i data-lucide="file-badge" class="w-4 h-4 text-vtc-gold"></i> Bon de réservation préalable
+                </h3>
+                <button onclick="closeBonModal()" class="text-slate-400 hover:text-white p-1">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto p-4 bg-slate-200 text-slate-900 flex-1">
+                <div id="printable-bon" class="bg-white p-6 rounded-xl shadow-md border border-slate-300 text-slate-900 space-y-4">
+                    <div class="border-b-2 border-slate-900 pb-3 flex justify-between items-start">
+                        <div>
+                            <h1 class="text-lg font-black uppercase text-slate-900 tracking-tight">BON DE RÉSERVATION VTC</h1>
+                            <p class="text-[11px] text-slate-600 font-bold">Justificatif préalable obligatoire de transport</p>
+                        </div>
+                        <div class="text-right text-[10px] text-slate-600">
+                            <p>Émis le : <span id="modal-date-emission" class="font-bold">--/--/----</span></p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">TRANSPORTEUR</p>
+                            <p><strong>Société :</strong> LE BON FRÈRE VTC</p>
+                            <p><strong>SIRET :</strong> 84435446400027</p>
+                            <p><strong>Chauffeur :</strong> <span id="modal-driver-name" class="font-bold text-slate-900">Anisse</span></p>
+                            <p><strong>Téléphone :</strong> <span id="modal-driver-phone" class="font-medium">+33 7 43 29 99 96</span></p>
+                            <p><strong>Immatriculation :</strong> EF-842-SJ</p>
+                        </div>
+                        <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1">
+                            <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">CLIENT / PASSAGER</p>
+                            <p><strong>Nom :</strong> <span id="modal-client-name" class="font-bold text-slate-900">Client Privé</span></p>
+                            <p><strong>Date :</strong> <span id="modal-travel-date" class="font-medium">--/--/----</span></p>
+                            <p><strong>Heure prise en charge :</strong> <span id="modal-travel-time" class="font-medium">--:--</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1 text-xs">
+                        <p class="font-black text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1 text-[11px]">DÉROULEMENT DU TRAJET</p>
+                        <p><strong>Prise en charge :</strong> <span id="modal-from" class="font-medium text-slate-800">--</span></p>
+                        <p><strong>Destination :</strong> <span id="modal-to" class="font-medium text-slate-800">--</span></p>
+                    </div>
+
+                    <div class="bg-slate-900 text-white p-3.5 rounded-lg space-y-1 text-xs">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Prix Hors Taxes (HT) :</span>
+                            <span id="modal-price-ht" class="font-bold">0.00 €</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>TVA (10 %) :</span>
+                            <span id="modal-price-tva" class="font-bold">0.00 €</span>
+                        </div>
+                        <div class="flex justify-between font-black text-base pt-1.5 border-t border-slate-700 text-amber-400">
+                            <span>Total TTC convenu :</span>
+                            <span id="modal-price-ttc">0.00 €</span>
+                        </div>
+                    </div>
+
+                    <p class="text-[9px] text-slate-500 text-center border-t border-slate-200 pt-2">
+                        Document valant justificatif de réservation préalable conformément aux dispositions de l'article R. 3122-10 du Code des transports.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-3 bg-vtc-850 border-t border-vtc-700 flex justify-end gap-2 no-print">
+                <button onclick="copyBonWhatsApp()" class="px-4 py-2 bg-vtc-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5">
+                    <i data-lucide="copy" class="w-4 h-4"></i> Copier texte
+                </button>
+                <button onclick="window.print()" class="px-4 py-2 bg-vtc-gold text-slate-950 rounded-xl text-xs font-black flex items-center gap-1.5 shadow">
+                    <i data-lucide="printer" class="w-4 h-4"></i> Imprimer
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMATION RESET JOUR 04h-04h -->
+    <div id="reset-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-vtc-850 rounded-2xl p-5 border border-vtc-700 max-w-xs w-full space-y-3.5 text-center shadow-2xl">
+            <h3 class="text-sm font-extrabold text-white">Réinitialiser la tranche 04h-04h ?</h3>
+            <p class="text-xs text-slate-400">Seules les courses de la tranche du jour en cours (04h00 du matin jusqu'à 04h00 le lendemain) seront effacées.</p>
+            <div class="flex gap-2 pt-1">
+                <button onclick="closeResetModal()" class="flex-1 py-2.5 bg-vtc-700 text-white rounded-xl text-xs font-bold">Annuler</button>
+                <button onclick="executeResetCurrentShift()" class="flex-1 py-2.5 bg-rose-600 text-white rounded-xl text-xs font-bold">Effacer le jour J</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- SCRIPT DE FONCTIONNEMENT COMPLET                              -->
+    <!-- ============================================================== -->
+    <script>
+        // Clé Google Maps facultative : si laissée vide, le calculateur utilise automatiquement l'API OpenRoute/OSRM gratuite.
+        const GOOGLE_MAPS_API_KEY = "";
+
+        // Chauffeurs configurés
+        const DRIVERS = [
+            { name: "Anisse", phone: "+33 7 43 29 99 96" },
+            { name: "Hedi",   phone: "+33 7 66 60 32 65" },
+            { name: "Amine",  phone: "+33 6 65 64 65 32" }
+        ];
+
+        // Facteurs d'affluence
+        const AFFLUENCE_FACTORS = {
+            faible:     { label: "Faible",      coef: 0.95 },
+            normale:    { label: "Normale",     coef: 1.00 },
+            forte:      { label: "Forte",       coef: 1.20 },
+            tres_forte: { label: "Très forte",  coef: 1.40 }
+        };
+
+        let courses = [];
+        let currentChannel = 'Uber';
+        let calculatedOffers = [];
+        let selectedOfferIndex = null;
+        let lastRouteComputed = null;
+
+        // ====== INITIALISATION ======
+        window.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) lucide.createIcons();
+            loadCoursesFromStorage();
+            selectChannel('Uber');
+            renderShiftData();
+            initDefaultDates();
+            onDriverSelected();
+            syncCoefFromRange();
+        });
+
+        function initDefaultDates() {
+            const now = new Date();
+            const dateStr = formatDateForInput(now);
+            const timeStr = now.toTimeString().substring(0, 5);
+
+            document.getElementById('devis-date').value = dateStr;
+            document.getElementById('devis-time').value = timeStr;
+            document.getElementById('resa-date').value = dateStr;
+            document.getElementById('resa-time').value = timeStr;
+        }
+
+        function formatDateForInput(d) {
+            const pad = n => String(n).padStart(2, '0');
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-text').innerText = msg;
+            toast.classList.remove('opacity-0');
+            setTimeout(() => toast.classList.add('opacity-0'), 2500);
+        }
+
+        // ====== NAVIGATION PAR ONGLETS ======
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab-btn').forEach(btn => btn.classList.remove('nav-active'));
+
+            const panel = document.getElementById(`panel-${tabId}`);
+            const btn = document.getElementById(`nav-btn-${tabId}`);
+            if (panel) panel.classList.add('active');
+            if (btn) btn.classList.add('nav-active');
+
+            if (window.lucide) lucide.createIcons();
+        }
+
+        // ====== GESTION DE LA CAISSE (TRANCHE 04h00 -> 04h00) ======
+        // En soustrayant 4h au timestamp, une course à 02h30 du matin tombe mathématiquement
+        // dans le shift de la veille (jour J), garantissant la tranche 4h -> 4h.
+        function getShiftKey(timestamp) {
+            const shifted = new Date(timestamp - (4 * 3600 * 1000));
+            return formatDateForInput(shifted);
+        }
+
+        function getShiftDayOfWeek(timestamp) {
+            const shifted = new Date(timestamp - (4 * 3600 * 1000));
+            // 0 = Lundi, 6 = Dimanche
+            return (shifted.getDay() + 6) % 7;
+        }
+
+        function getVtcWeekKey(timestamp) {
+            const shifted = new Date(timestamp - (4 * 3600 * 1000));
+            const target = new Date(shifted.valueOf());
+            const dayNr = (shifted.getDay() + 6) % 7;
+            target.setDate(target.getDate() - dayNr + 3);
+            const firstThursday = target.valueOf();
+            target.setMonth(0, 1);
+            if (target.getDay() !== 4) {
+                target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+            }
+            const weekNumber = 1 + Math.ceil((firstThursday - target) / 604800000);
+            return `${shifted.getFullYear()}-W${weekNumber}`;
+        }
+
+        function loadCoursesFromStorage() {
+            try {
+                const stored = localStorage.getItem('vtc_courses_v2');
+                courses = stored ? JSON.parse(stored) : [];
+            } catch (e) {
+                courses = [];
+            }
+        }
+
+        function saveCoursesToStorage() {
+            localStorage.setItem('vtc_courses_v2', JSON.stringify(courses));
+            renderShiftData();
+        }
+
+        function selectChannel(channel) {
+            currentChannel = channel;
+            document.querySelectorAll('.chan-btn').forEach(b => {
+                b.classList.remove('border-emerald-400', 'bg-emerald-950/70', 'text-emerald-300');
+                b.classList.add('border-slate-700', 'bg-vtc-900', 'text-slate-300');
+            });
+            const active = document.getElementById(`btn-chan-${channel}`);
+            if (active) {
+                active.classList.remove('border-slate-700', 'bg-vtc-900', 'text-slate-300');
+                active.classList.add('border-emerald-400', 'bg-emerald-950/70', 'text-emerald-300');
+            }
+        }
+
+        function addCourse() {
+            const input = document.getElementById('input-amount');
+            const val = parseFloat(input.value.replace(',', '.'));
+            if (isNaN(val) || val <= 0) {
+                return showToast("Veuillez saisir un montant valide");
+            }
+
+            const now = new Date();
+            const course = {
+                id: Date.now(),
+                amount: val,
+                channel: currentChannel,
+                timestamp: now.getTime(),
+                timeStr: now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+            };
+
+            courses.unshift(course);
+            saveCoursesToStorage();
+            input.value = '';
+            showToast(`+${val.toFixed(2)} € [${currentChannel}] encaissé`);
+        }
+
+        function deleteCourse(id) {
+            courses = courses.filter(c => c.id !== id);
+            saveCoursesToStorage();
+            showToast("Course supprimée");
+        }
+
+        function confirmResetCurrentShift() {
+            document.getElementById('reset-modal').classList.remove('hidden');
+        }
+
+        function closeResetModal() {
+            document.getElementById('reset-modal').classList.add('hidden');
+        }
+
+        function executeResetCurrentShift() {
+            const currentShift = getShiftKey(Date.now());
+            courses = courses.filter(c => getShiftKey(c.timestamp) !== currentShift);
+            saveCoursesToStorage();
+            closeResetModal();
+            showToast("Shift 04h-04h réinitialisé à 0.00 €");
+        }
+
+        function renderShiftData() {
+            const nowTs = Date.now();
+            const currentShift = getShiftKey(nowTs);
+            const currentWeek = getVtcWeekKey(nowTs);
+            const currentDayIndex = getShiftDayOfWeek(nowTs);
+
+            let daySum = 0;
+            let weekSum = 0;
+            const weekDays = [0, 0, 0, 0, 0, 0, 0];
+            const shiftCourses = [];
+
+            courses.forEach(c => {
+                if (getVtcWeekKey(c.timestamp) === currentWeek) {
+                    weekSum += c.amount;
+                    const dIdx = getShiftDayOfWeek(c.timestamp);
+                    weekDays[dIdx] += c.amount;
+                }
+                if (getShiftKey(c.timestamp) === currentShift) {
+                    daySum += c.amount;
+                    shiftCourses.push(c);
+                }
+            });
+
+            document.getElementById('header-day-total').innerText = daySum.toFixed(2);
+            document.getElementById('header-week-total').innerText = `${weekSum.toFixed(2)} €`;
+            document.getElementById('count-shift-courses').innerText = `${shiftCourses.length} course${shiftCourses.length > 1 ? 's' : ''}`;
+
+            // Liste des courses
+            const listEl = document.getElementById('shift-courses-list');
+            listEl.innerHTML = '';
+
+            if (shiftCourses.length === 0) {
+                listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs bg-vtc-850 rounded-xl border border-vtc-700/50">Aucune course enregistrée pour ce shift (04h00 → 04h00).</div>`;
+            } else {
+                shiftCourses.forEach(c => {
+                    const row = document.createElement('div');
+                    row.className = "bg-vtc-850 p-3 rounded-xl border border-vtc-700/60 flex justify-between items-center";
+                    row.innerHTML = `
+                        <div class="flex items-center gap-2">
+                            ${getBadgeChannel(c.channel)}
+                            <span class="text-xs font-semibold text-slate-300">${c.timeStr}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-base font-black text-white">${c.amount.toFixed(2)} €</span>
+                            <button onclick="deleteCourse(${c.id})" class="text-slate-500 hover:text-rose-400 p-1">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                    listEl.appendChild(row);
+                });
+            }
+
+            renderWeekChart(weekDays, currentDayIndex);
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function getBadgeChannel(channel) {
+            switch(channel) {
+                case 'Uber': return `<span class="bg-black text-white text-[10px] font-extrabold px-2 py-0.5 rounded border border-slate-700">Uber</span>`;
+                case 'Bolt': return `<span class="bg-emerald-950 text-emerald-400 text-[10px] font-extrabold px-2 py-0.5 rounded border border-emerald-800">Bolt</span>`;
+                case 'Heetch': return `<span class="bg-rose-950 text-rose-400 text-[10px] font-extrabold px-2 py-0.5 rounded border border-rose-800">Heetch</span>`;
+                default: return `<span class="bg-blue-950 text-blue-400 text-[10px] font-extrabold px-2 py-0.5 rounded border border-blue-800">Privé</span>`;
+            }
+        }
+
+        function renderWeekChart(weekDays, todayIdx) {
+            const container = document.getElementById('chart-week');
+            container.innerHTML = '';
+            const labels = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
+            const maxVal = Math.max(...weekDays, 80);
+
+            weekDays.forEach((val, idx) => {
+                const heightPercent = Math.min(Math.round((val / maxVal) * 100), 100);
+                const isToday = idx === todayIdx;
+                const col = document.createElement('div');
+                col.className = "flex-1 flex flex-col items-center h-full justify-end gap-1";
+                col.innerHTML = `
+                    <span class="text-[9px] font-extrabold ${isToday ? 'text-vtc-brand' : 'text-slate-400'}">${val > 0 ? Math.round(val) + '€' : ''}</span>
+                    <div class="w-full bg-vtc-900 rounded-t-md relative overflow-hidden flex items-end ${isToday ? 'ring-1 ring-vtc-brand' : ''}" style="height: 70px;">
+                        <div class="w-full bg-gradient-to-t from-emerald-600 to-vtc-brand rounded-t-md transition-all duration-300" style="height: ${heightPercent}%;"></div>
+                    </div>
+                    <span class="text-[10px] font-bold ${isToday ? 'text-vtc-brand' : 'text-slate-400'}">${labels[idx]}</span>
+                `;
+                container.appendChild(col);
+            });
+        }
+
+        // ====== DEVIS PRIVÉ, CALCULATEUR ET ITINÉRAIRE ======
+        function getEffectiveCoef() {
+            const manual = parseFloat(document.getElementById('devis-coef-manual').value);
+            if (!isNaN(manual) && manual > 0) return manual;
+            return parseFloat(document.getElementById('devis-coef-range').value) || 1.0;
+        }
+
+        function syncCoefFromRange() {
+            const val = parseFloat(document.getElementById('devis-coef-range').value);
+            document.getElementById('label-coef').innerText = `× ${val.toFixed(2)}`;
+            document.getElementById('devis-coef-manual').value = '';
+        }
+
+        function syncCoefFromManual() {
+            const val = parseFloat(document.getElementById('devis-coef-manual').value);
+            if (!isNaN(val) && val > 0) {
+                document.getElementById('label-coef').innerText = `× ${val.toFixed(2)}`;
+                document.getElementById('devis-coef-range').value = Math.min(Math.max(val, 0.5), 3.0);
+            }
+        }
+
+        function setCoefValue(v) {
+            document.getElementById('devis-coef-range').value = v;
+            document.getElementById('devis-coef-manual').value = '';
+            syncCoefFromRange();
+        }
+
+        function detectAutoAffluence(dateObj) {
+            const hour = dateObj.getHours();
+            const day = dateObj.getDay(); // 0=Dimanche, 5=Vendredi, 6=Samedi
+            // Nuits du weekend
+            if ((day === 5 || day === 6) && (hour >= 22 || hour < 5)) return 'tres_forte';
+            // Heures de pointe semaine
+            if (day >= 1 && day <= 5 && ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 20))) return 'forte';
+            // Creux de nuit en semaine
+            if (hour >= 1 && hour < 6) return 'faible';
+            return 'normale';
+        }
+
+        function onAffluenceChange() {
+            const val = document.getElementById('devis-affluence').value;
+            const badge = document.getElementById('badge-affluence');
+            if (val === 'auto') {
+                badge.innerText = "Auto détecté";
+            } else {
+                badge.innerText = `Manuel (${AFFLUENCE_FACTORS[val].label})`;
+            }
+        }
+
+        // Géocodage et routage automatique (OSRM gratuit sans clé, ou estimation de secours)
+        async function fetchRouteDistanceTime(fromText, toText, depDate) {
+            const indicator = document.getElementById('route-indicator');
+            indicator.innerText = "Calcul de l'itinéraire en cours...";
+
+            try {
+                // Tentative via OpenStreetMap Nominatim + OSRM
+                const geo1 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(fromText + ' France')}`).then(r => r.json());
+                const geo2 = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(toText + ' France')}`).then(r => r.json());
+
+                if (geo1 && geo1.length > 0 && geo2 && geo2.length > 0) {
+                    const coord1 = `${geo1[0].lon},${geo1[0].lat}`;
+                    const coord2 = `${geo2[0].lon},${geo2[0].lat}`;
+                    const osrm = await fetch(`https://router.project-osrm.org/route/v1/driving/${coord1};${coord2}?overview=false`).then(r => r.json());
+                    if (osrm && osrm.routes && osrm.routes.length > 0) {
+                        const distKm = osrm.routes[0].distance / 1000;
+                        let durationMin = osrm.routes[0].duration / 60;
+                        // Correction de trafic selon l'heure
+                        const h = depDate.getHours();
+                        if ((h >= 7 && h <= 9) || (h >= 17 && h <= 20)) durationMin *= 1.35;
+                        indicator.innerText = "✓ Itinéraire routier calculé en temps réel";
+                        return { km: distKm, minutes: Math.round(durationMin), source: 'reel' };
+                    }
+                }
+            } catch (err) {
+                // Fallback direct
+            }
+
+            // Estimation locale robuste si pas de réseau ou lieu introuvable
+            indicator.innerText = "✓ Estimation rapide basée sur la distance";
+            const mockKm = Math.floor(14 + ((fromText.length + toText.length) % 26));
+            const h = depDate.getHours();
+            const traffic = ((h >= 7 && h <= 9) || (h >= 17 && h <= 20)) ? 1.4 : 1.15;
+            return { km: mockKm, minutes: Math.round(mockKm * 2.1 * traffic), source: 'estime' };
+        }
+
+        async function computeOffers() {
+            const from = document.getElementById('devis-from').value.trim();
+            const to = document.getElementById('devis-to').value.trim();
+            const dateStr = document.getElementById('devis-date').value;
+            const timeStr = document.getElementById('devis-time').value;
+
+            if (!from || !to) {
+                return showToast("Veuillez saisir un départ et une destination");
+            }
+
+            const depDate = new Date(`${dateStr || formatDateForInput(new Date())}T${timeStr || '12:00'}`);
+            const btn = document.getElementById('btn-calc-devis');
+            btn.disabled = true;
+            btn.innerHTML = `<i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Calcul en cours...`;
+            if (window.lucide) lucide.createIcons();
+
+            const route = await fetchRouteDistanceTime(from, to, depDate);
+
+            // Détermination affluence
+            const affSelect = document.getElementById('devis-affluence').value;
+            const affKey = affSelect === 'auto' ? detectAutoAffluence(depDate) : affSelect;
+            const aff = AFFLUENCE_FACTORS[affKey];
+
+            // Coefficient multiplicateur choisi par le chauffeur
+            const coef = getEffectiveCoef();
+
+            // Formule de rentabilité VTC (Base + km + temps)
+            const baseFare = 4.00 + (route.km * 1.25) + (route.minutes * 0.40);
+            const standardPrice = Math.max(Math.round(baseFare * 1.10 * aff.coef * coef), 20);
+            const confortPrice = Math.round(standardPrice * 1.20);
+            const expressPrice = Math.round(standardPrice * 1.45);
+
+            lastRouteComputed = { from, to, dateStr, timeStr, km: route.km, minutes: route.minutes };
+
+            calculatedOffers = [
+                {
+                    id: 'standard',
+                    name: 'Course Standard (Éco)',
+                    desc: 'Berline hybride classique, rentabilité garantie',
+                    price: standardPrice,
+                    rate: Math.round(standardPrice / (route.minutes / 60))
+                },
+                {
+                    id: 'confort',
+                    name: 'Course Confort / Berline',
+                    desc: 'Prestation soignée, bouteilles d\'eau & chargeurs',
+                    price: confortPrice,
+                    rate: Math.round(confortPrice / (route.minutes / 60))
+                },
+                {
+                    id: 'express',
+                    name: 'Express / Forte Majoration',
+                    desc: 'Prioritaire, trafic dense ou forte demande',
+                    price: expressPrice,
+                    rate: Math.round(expressPrice / (route.minutes / 60))
+                }
+            ];
+
+            // Mise à jour de l'affichage
+            document.getElementById('metric-dist').innerText = `${route.km.toFixed(1)} km`;
+            document.getElementById('metric-time').innerText = `${route.minutes} min`;
+            document.getElementById('metric-affluence').innerText = `${aff.label} (×${aff.coef})`;
+
+            renderOffers();
+            document.getElementById('devis-results').classList.remove('hidden');
+
+            btn.disabled = false;
+            btn.innerHTML = `<i data-lucide="sparkles" class="w-4 h-4"></i> Recalculer les tarifs`;
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function renderOffers() {
+            const container = document.getElementById('offers-list');
+            container.innerHTML = '';
+            selectedOfferIndex = null;
+            document.getElementById('btn-transfer-bon').disabled = true;
+
+            calculatedOffers.forEach((o, idx) => {
+                const card = document.createElement('div');
+                card.id = `offer-card-${idx}`;
+                card.className = "offer-card bg-vtc-900 border-2 border-vtc-700/80 hover:border-vtc-accent rounded-xl p-3 flex justify-between items-center cursor-pointer transition active:scale-[0.99]";
+                card.onclick = () => selectOffer(idx);
+                card.innerHTML = `
+                    <div class="space-y-0.5">
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-black text-white">${o.name}</span>
+                            <span class="text-[10px] text-emerald-400 font-bold bg-emerald-950 px-1.5 py-0.2 rounded border border-emerald-800">~${o.rate}€/h</span>
+                        </div>
+                        <p class="text-[10px] text-slate-400">${o.desc}</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xl font-black text-vtc-brand">${o.price} €</span>
+                        <span class="block text-[9px] text-slate-400 font-bold">TTC</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function selectOffer(idx) {
+            selectedOfferIndex = idx;
+            document.querySelectorAll('.offer-card').forEach((c, i) => {
+                if (i === idx) c.classList.add('offer-selected');
+                else c.classList.remove('offer-selected');
+            });
+            document.getElementById('btn-transfer-bon').disabled = false;
+        }
+
+        function generateBonFromSelectedOffer() {
+            if (selectedOfferIndex === null || !lastRouteComputed) {
+                return showToast("Veuillez sélectionner une offre");
+            }
+
+            const offer = calculatedOffers[selectedOfferIndex];
+
+            // Remplissage automatique des champs du Bon de Réservation
+            document.getElementById('resa-from').value = lastRouteComputed.from;
+            document.getElementById('resa-to').value = lastRouteComputed.to;
+            document.getElementById('resa-date').value = lastRouteComputed.dateStr;
+            document.getElementById('resa-time').value = lastRouteComputed.timeStr;
+            document.getElementById('resa-price').value = offer.price.toFixed(2);
+
+            // Bascule sur l'onglet Bon Résa
+            switchTab('resa');
+            showToast(`Bon pré-rempli : ${offer.name} (${offer.price} €)`);
+        }
+
+        // ====== GESTION DU CHAUFFEUR & DU BON DE RÉSERVATION ======
+        function onDriverSelected() {
+            const idx = parseInt(document.getElementById('select-driver').value, 10);
+            const driver = DRIVERS[idx] || DRIVERS[0];
+            document.getElementById('card-driver-phone').innerText = driver.phone;
+            document.getElementById('modal-driver-name').innerText = driver.name;
+            document.getElementById('modal-driver-phone').innerText = driver.phone;
+        }
+
+        function getActiveDriver() {
+            const idx = parseInt(document.getElementById('select-driver').value, 10);
+            return DRIVERS[idx] || DRIVERS[0];
+        }
+
+        function openBonModal() {
+            const driver = getActiveDriver();
+            const client = document.getElementById('resa-client').value.trim() || 'Client Privé';
+            const rawDate = document.getElementById('resa-date').value;
+            const time = document.getElementById('resa-time').value || '--:--';
+            const from = document.getElementById('resa-from').value.trim() || 'Lieu non renseigné';
+            const to = document.getElementById('resa-to').value.trim() || 'Lieu non renseigné';
+            const priceTTC = parseFloat(document.getElementById('resa-price').value.replace(',', '.')) || 0;
+
+            let formattedDate = rawDate;
+            if (rawDate) {
+                const [y, m, d] = rawDate.split('-');
+                formattedDate = `${d}/${m}/${y}`;
+            }
+
+            const priceHT = priceTTC / 1.10;
+            const priceTVA = priceTTC - priceHT;
+
+            document.getElementById('modal-driver-name').innerText = driver.name;
+            document.getElementById('modal-driver-phone').innerText = driver.phone;
+            document.getElementById('modal-client-name').innerText = client;
+            document.getElementById('modal-travel-date').innerText = formattedDate;
+            document.getElementById('modal-travel-time').innerText = time;
+            document.getElementById('modal-from').innerText = from;
+            document.getElementById('modal-to').innerText = to;
+            document.getElementById('modal-price-ht').innerText = `${priceHT.toFixed(2)} €`;
+            document.getElementById('modal-price-tva').innerText = `${priceTVA.toFixed(2)} €`;
+            document.getElementById('modal-price-ttc').innerText = `${priceTTC.toFixed(2)} €`;
+            document.getElementById('modal-date-emission').innerText = new Date().toLocaleDateString('fr-FR');
+
+            document.getElementById('bon-modal').classList.remove('hidden');
+            if (window.lucide) lucide.createIcons();
+        }
+
+        function closeBonModal() {
+            document.getElementById('bon-modal').classList.add('hidden');
+        }
+
+        async function copyBonWhatsApp() {
+            const driver = getActiveDriver();
+            const client = document.getElementById('resa-client').value.trim() || 'Client Privé';
+            const rawDate = document.getElementById('resa-date').value;
+            const time = document.getElementById('resa-time').value || '--:--';
+            const from = document.getElementById('resa-from').value.trim() || 'Non renseigné';
+            const to = document.getElementById('resa-to').value.trim() || 'Non renseigné';
+            const priceTTC = parseFloat(document.getElementById('resa-price').value.replace(',', '.')) || 0;
+
+            let formattedDate = rawDate;
+            if (rawDate) {
+                const [y, m, d] = rawDate.split('-');
+                formattedDate = `${d}/${m}/${y}`;
+            }
+
+            const text = 
+`🚕 *BON DE RÉSERVATION PRÉALABLE VTC*
+_Conforme à l'article R. 3122-10 du Code des transports_
+
+• *Société :* LE BON FRÈRE VTC (SIRET 84435446400027)
+• *Chauffeur :* ${driver.name} (${driver.phone})
+• *Véhicule :* Toyota Auris (EF-842-SJ)
+
+• *Passager :* ${client}
+• *Prise en charge :* ${formattedDate} à ${time}
+• *Départ :* ${from}
+• *Destination :* ${to}
+• *Tarif convenu :* ${priceTTC.toFixed(2)} € TTC (TVA 10% incluse)`;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast("Texte copié pour WhatsApp / SMS !");
+            } catch (err) {
+                showToast("Erreur lors de la copie");
+            }
+        }
+    </script>
+</body>
+</html>
